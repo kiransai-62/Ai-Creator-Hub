@@ -117,13 +117,6 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
     }
   };
 
-  const handleShare = (id: string) => {
-    const url = `${window.location.origin}/details/${id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      alert('Link copied to clipboard!');
-    }).catch(console.error);
-  };
-
   if (showLoader) {
     return <Loader3D progress={Math.min(simulatedProgress, 100)} onComplete={() => setShowLoader(false)} />;
   }

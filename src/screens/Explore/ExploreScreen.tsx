@@ -14,7 +14,7 @@ interface ExploreScreenProps {
   isAdmin?: boolean;
 }
 
-export function ExploreScreen({ isAuthenticated, onCopy, onLogin, userId, isAdmin }: ExploreScreenProps) {
+export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: ExploreScreenProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -114,13 +114,6 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, userId, isAdmi
         alert('Failed to delete prompt');
       }
     }
-  };
-
-  const handleShare = (id: string) => {
-    const url = `${window.location.origin}/details/${id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      alert('Link copied to clipboard!');
-    }).catch(console.error);
   };
 
   const formatStat = (num: number | null) => {

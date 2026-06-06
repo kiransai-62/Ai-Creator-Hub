@@ -13,7 +13,7 @@ interface HomeScreenProps {
   isAdmin?: boolean;
 }
 
-export function HomeScreen({ onCardClick, onExploreClick, userId, isAdmin }: HomeScreenProps) {
+export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenProps) {
   const navigate = useNavigate();
   const [trending, setTrending] = useState<PromptWithAuthor[]>([]);
   const [mostCopied, setMostCopied] = useState<PromptWithAuthor[]>([]);
@@ -61,13 +61,6 @@ export function HomeScreen({ onCardClick, onExploreClick, userId, isAdmin }: Hom
         alert('Failed to delete prompt');
       }
     }
-  };
-
-  const handleShare = (id: string) => {
-    const url = `${window.location.origin}/details/${id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      alert('Link copied to clipboard!');
-    }).catch(console.error);
   };
 
   return (

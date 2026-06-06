@@ -8,7 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import { 
   BadgeCheck, User as UserIcon, Camera, CreditCard, 
   Download, Monitor, Moon, Sun, HelpCircle, Shield, 
-  FileText, ChevronDown, LogOut, AlertTriangle, Check
+  FileText, ChevronDown, LogOut, Check
 } from 'lucide-react';
 
 /* ── UI Helpers ──────────────────────────────────────────────────────────── */
