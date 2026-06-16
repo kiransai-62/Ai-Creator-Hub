@@ -31,3 +31,10 @@ lint_output.txt
 parse-lint.cjs
 remove_animations.cjs
 
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
