@@ -53,6 +53,11 @@ export function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             <span>Terms of Service</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
+          <div className="divider"></div>
+          <button className="settings-item" onClick={() => onNavigate('copyright-policy')}>
+            <span>Copyright Policy</span>
+            <ChevronRight size={18} className="text-muted" />
+          </button>
         </div>
       </div>
 

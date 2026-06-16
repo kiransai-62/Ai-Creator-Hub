@@ -18,6 +18,7 @@ import {
   HelpCenterScreen, 
   PrivacyPolicyScreen, 
   TermsOfServiceScreen,
+  CopyrightPolicyScreen,
   SignOutModal
 } from './screens/Settings/SettingsSubScreens';
 
@@ -112,6 +113,7 @@ function App() {
     if (path.includes('/help-center')) return 'Help Center';
     if (path.includes('/privacy-policy')) return 'Privacy Policy';
     if (path.includes('/terms-of-service')) return 'Terms of Service';
+    if (path.includes('/copyright-policy')) return 'Copyright Policy';
     return 'Settings';
   };
 
@@ -293,6 +295,7 @@ function App() {
         <Route path="/settings/help-center" element={<HelpCenterScreen />} />
         <Route path="/settings/privacy-policy" element={<PrivacyPolicyScreen />} />
         <Route path="/settings/terms-of-service" element={<TermsOfServiceScreen />} />
+        <Route path="/settings/copyright-policy" element={<CopyrightPolicyScreen />} />
         
         {/* Fallback to Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
