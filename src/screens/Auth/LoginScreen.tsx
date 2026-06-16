@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Logo } from '../../components/Logo/Logo';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
@@ -56,7 +57,7 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
     <div className="login-screen">
       <div className="login-container">
         <div className="login-header">
-          <h1>AI Creator Hub</h1>
+          <Logo size={36} className="centered login-logo" />
           <p>Create, Discover & Share AI</p>
         </div>
 

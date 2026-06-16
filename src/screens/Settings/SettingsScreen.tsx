@@ -1,4 +1,5 @@
 import { ChevronRight, LogOut } from 'lucide-react';
+import { Logo } from '../../components/Logo/Logo';
 import './SettingsScreen.css';
 
 interface SettingsScreenProps {
@@ -70,7 +71,7 @@ export function SettingsScreen({ onNavigate }: SettingsScreenProps) {
       
       <div className="app-version">
         <p>Version 1.0.0</p>
-        <p>AI Creator Hub</p>
+        <Logo size={14} className="centered settings-logo" />
       </div>
     </div>
   );
