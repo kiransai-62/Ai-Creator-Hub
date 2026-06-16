@@ -1,14 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
 .ai-logo {
   display: flex;
-  align-items: center;
-  gap: 10px;
   user-select: none;
   cursor: pointer;
+  align-items: center;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
 }
 
 .ai-logo:hover {
   transform: translateY(-0.5px);
+}
+
+.ai-logo.horizontal {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.ai-logo.vertical {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
 }
 
 .logo-icon-wrapper {
@@ -16,58 +30,107 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
+  filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.35)) drop-shadow(0 0 4px rgba(0, 212, 255, 0.2));
   transition: filter 0.3s ease;
 }
 
 .ai-logo:hover .logo-icon-wrapper {
-  filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+  filter: drop-shadow(0 0 16px rgba(108, 92, 231, 0.6)) drop-shadow(0 0 6px rgba(0, 212, 255, 0.4));
 }
 
-.logo-bolt {
+.logo-ribbon {
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform-origin: 24px 23px;
+  transform-origin: 48px 56px;
 }
 
-.ai-logo:hover .logo-bolt {
-  transform: scale(1.08) rotate(-4deg);
+.ai-logo:hover .logo-ribbon {
+  transform: scale(1.04);
 }
 
-.logo-text {
-  font-family: 'Outfit', 'Inter', sans-serif;
+.logo-spark {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: 48px 55px;
+}
+
+.ai-logo:hover .logo-spark {
+  transform: scale(1.15) rotate(15deg);
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.horizontal .logo-text-group {
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.vertical .logo-text-group {
+  align-items: center;
+  gap: 4px;
+}
+
+.logo-main-text {
+  font-family: 'Poppins', 'Outfit', sans-serif;
   font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
   color: var(--text-heading);
   white-space: nowrap;
 }
 
-.logo-text-highlight {
-  background: var(--accent-purple-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.horizontal .logo-main-text {
+  font-size: 15px;
+  line-height: 1.1;
 }
 
+.vertical .logo-main-text {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.logo-subtitle {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.vertical .logo-subtitle {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.vertical .logo-subtitle::before,
+.vertical .logo-subtitle::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--border-color);
+  opacity: 0.3;
+}
+
+.horizontal .logo-subtitle {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  opacity: 0.7;
+}
+
+/* Custom specific classes */
 .ai-logo.centered {
   justify-content: center;
 }
 
-.login-logo {
-  margin-bottom: 12px;
+.login-logo .logo-main-text {
+  font-size: 28px;
 }
 
-.login-logo .logo-text {
-  font-size: 26px;
-}
-
-.settings-logo {
-  margin-top: 6px;
-}
-
-.settings-logo .logo-text {
+.settings-logo .logo-main-text {
   font-size: 14px;
-  color: var(--text-muted);
 }
-
-

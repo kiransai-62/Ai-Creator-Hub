@@ -57,7 +57,7 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
     <div className="login-screen">
       <div className="login-container">
         <div className="login-header">
-          <Logo size={36} className="centered login-logo" />
+          <Logo size={40} layout="vertical" className="login-logo" />
           <p>Create, Discover & Share AI</p>
         </div>
 
