@@ -279,7 +279,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
   overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -290,7 +289,6 @@ h1, h2, h3, h4, h5, h6 {
 
 html {
   overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
 }
 
 a {

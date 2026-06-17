@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Bell, ArrowLeft, User, Compass, Crown } from 'lucide-react';
 import { SearchAutocomplete } from '../SearchAutocomplete/SearchAutocomplete';
 import { Logo } from '../Logo/Logo';
@@ -44,7 +45,9 @@ export function TopBar({
           {title && <h2 className="screen-title-text">{title}</h2>}
         </div>
       ) : (
-        <Logo size={24} />
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <Logo size={24} />
+        </Link>
       )}
 
       {/* ── CENTER: Inline Search (tablet+, main screens) ── */}
