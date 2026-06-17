@@ -192,7 +192,24 @@ async function start() {
         "@type": "WebSite",
         "name": "AI Creator Hub",
         "url": frontendUrl
-      }
+      },
+      bodyContent: `
+        <div class="app-container">
+          <header class="top-bar glass-panel" style="display:flex; justify-content:space-between; align-items:center; height:70px; padding:0 24px; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border-color); background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-family:'Outfit',sans-serif; font-size:20px; font-weight:700; background:linear-gradient(135deg, #A855F7 0%, #7C3AED 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.02em;">AI Creator Hub</span>
+            </div>
+          </header>
+          <div class="home-screen" style="max-width:1200px; margin:0 auto; padding:0 16px;">
+            <section class="hero-section" style="display:flex; flex-direction:column; align-items:center; text-align:center; padding:40px 0 32px; position:relative;">
+              <div class="badge-pill" style="color:#8B5CF6; background:rgba(139, 92, 246, 0.15); border:1px solid #8B5CF6; padding:6px 18px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:24px; text-transform:uppercase; border-radius:9999px;">AI Prompt Marketplace</div>
+              <h1 class="hero-title" style="font-family:'Outfit',sans-serif; font-size:36px; font-weight:700; margin-bottom:16px; letter-spacing:-0.02em; line-height:1.1; color:var(--text-heading);">AI Creator Hub</h1>
+              <p class="hero-subtitle" style="font-size:15px; color:var(--text-secondary); margin-bottom:32px; line-height:1.6; max-width:500px;">Discover, share, and copy the best AI image, coding, and text prompts for Midjourney, ChatGPT, Stable Diffusion, and more.</p>
+              <a href="/explore" style="max-width:280px; width:100%; font-size:15px; font-weight:600; padding:16px; height:54px; display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; background:linear-gradient(135deg, #A855F7 0%, #7C3AED 100%); color:#fff; box-shadow:0 4px 14px -2px rgba(139, 92, 246, 0.4); text-decoration:none;">EXPLORE PROMPTS</a>
+            </section>
+          </div>
+        </div>
+      `
     },
     {
       route: 'explore',
@@ -204,7 +221,25 @@ async function start() {
         "@type": "WebPage",
         "name": "Explore Prompts",
         "url": `${frontendUrl}/explore`
-      }
+      },
+      bodyContent: `
+        <div class="app-container">
+          <header class="top-bar glass-panel" style="display:flex; justify-content:space-between; align-items:center; height:70px; padding:0 24px; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border-color); background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-family:'Outfit',sans-serif; font-size:20px; font-weight:700; background:linear-gradient(135deg, #A855F7 0%, #7C3AED 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.02em;">AI Creator Hub</span>
+            </div>
+          </header>
+          <div class="explore-screen" style="max-width:1200px; margin:0 auto; padding:24px 16px;">
+            <h1 style="font-family:'Outfit',sans-serif; font-size:28px; font-weight:700; margin-bottom:20px; color:var(--text-heading);">Explore Prompts</h1>
+            <div style="background:var(--bg-card); height:50px; border-radius:9999px; border:1px solid var(--border-color); margin-bottom:24px;"></div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+              <div style="background:var(--bg-card); border:1px solid var(--border-color); height:320px; border-radius:16px; opacity:0.6;"></div>
+              <div style="background:var(--bg-card); border:1px solid var(--border-color); height:320px; border-radius:16px; opacity:0.6;"></div>
+              <div style="background:var(--bg-card); border:1px solid var(--border-color); height:320px; border-radius:16px; opacity:0.6;"></div>
+            </div>
+          </div>
+        </div>
+      `
     },
     {
       route: 'settings/help-center',
@@ -258,7 +293,7 @@ async function start() {
 
   for (const pageItem of pages) {
     const url = pageItem.route ? `${frontendUrl}/${pageItem.route}` : frontendUrl;
-    const finalHtml = replaceMeta(templateHtml, pageItem.title, pageItem.description, url, pageItem.imageUrl, pageItem.jsonLd);
+    const finalHtml = replaceMeta(templateHtml, pageItem.title, pageItem.description, url, pageItem.imageUrl, pageItem.jsonLd, pageItem.bodyContent);
     
     if (pageItem.route === '') {
       // Overwrite main root index.html with Home page SEO
