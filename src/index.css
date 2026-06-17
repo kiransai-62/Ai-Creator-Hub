@@ -5,11 +5,11 @@
 :root,
 [data-theme="dark"] {
   /* Backgrounds */
-  --bg-primary: #09090B;      /* Zinc 950 */
+  --bg-primary: #4A4A4A;
   --bg-secondary: #18181B;    /* Zinc 900 */
   --bg-card: rgba(24, 24, 27, 0.7);
   --bg-elevated: #27272A;     /* Zinc 800 */
-  --bg-surface: #09090B;
+  --bg-surface: #4A4A4A;
   
   /* Glass effects */
   --glass-bg: rgba(24, 24, 27, 0.65);
@@ -95,11 +95,11 @@
    ═══════════════════════════════════════════════════════ */
 [data-theme="light"] {
   /* Backgrounds */
-  --bg-primary: #FAFAFA;      /* Zinc 50 */
+  --bg-primary: #4A4A4A;
   --bg-secondary: #F4F4F5;    /* Zinc 100 */
   --bg-card: rgba(255, 255, 255, 0.8);
   --bg-elevated: #FFFFFF;     /* White */
-  --bg-surface: #FAFAFA;
+  --bg-surface: #4A4A4A;
   
   /* Glass effects */
   --glass-bg: rgba(255, 255, 255, 0.75);
