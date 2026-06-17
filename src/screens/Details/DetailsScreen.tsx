@@ -75,10 +75,16 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
         
         // Fetch details
         const data = await api.getPromptDetails(id);
-        setPrompt(data);
+        if (data) {
+          setPrompt(data);
+          // If the user accessed the page via UUID, redirect to slug-based URL for SEO and UX consistency
+          if (data.slug && id === data.id) {
+            navigate(`/details/${data.slug}`, { replace: true });
+          }
+        }
 
-        if (userId) {
-          const saved = await api.isPromptSaved(userId, id);
+        if (data && userId) {
+          const saved = await api.isPromptSaved(userId, data.id);
           setIsSaved(saved);
         }
 
@@ -372,7 +378,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
               relatedPrompts.map(rp => (
                 <motion.div 
                   key={rp.id} 
-                  onClick={() => navigate(`/details/${rp.id}`)} 
+                  onClick={() => navigate(`/details/${rp.slug || rp.id}`)} 
                   style={{ cursor: 'pointer' }}
                   variants={itemVariants}
                 >
@@ -390,7 +396,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                     showDelete={isAdmin}
                     showEdit={isAdmin}
                     showReport={isAuthenticated && rp.author_id !== userId}
-                    shareUrl={`${window.location.origin}/details/${rp.id}`}
+                    shareUrl={`${window.location.origin}/details/${rp.slug || rp.id}`}
                     onDelete={() => handleDeleteClick(rp.id)}
                     onEdit={() => navigate(`/edit/${rp.id}`)}
                     onReport={async () => {

@@ -174,7 +174,7 @@ export function DashboardScreen({ user, onNavigate }: DashboardScreenProps) {
                 ) : (
                   <div className="prompt-item-actions">
                     <button 
-                      onClick={() => navigate(`/details/${prompt.id}`)}
+                      onClick={() => navigate(`/details/${prompt.slug || prompt.id}`)}
                       className="btn-view-prompt"
                     >
                       View
