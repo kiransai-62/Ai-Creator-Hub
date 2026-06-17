@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+/* P-1: Pure CSS Orbital Loader — replaces Three.js */
 
 .up-loader-container {
   display: flex;
@@ -15,100 +15,6 @@
   user-select: none;
 }
 
-/* Animated Noise */
-.up-noise-overlay {
-  position: absolute;
-  inset: -100%;
-  width: 300%;
-  height: 300%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  animation: noise 8s steps(10) infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes noise {
-  0% { transform: translate(0,0) }
-  10% { transform: translate(-5%,-5%) }
-  20% { transform: translate(-10%,5%) }
-  30% { transform: translate(5%,-10%) }
-  40% { transform: translate(-5%,15%) }
-  50% { transform: translate(-10%,5%) }
-  60% { transform: translate(15%,0) }
-  70% { transform: translate(0,15%) }
-  80% { transform: translate(3%,35%) }
-  90% { transform: translate(-10%,10%) }
-  100% { transform: translate(0,0) }
-}
-
-/* Ambient Glows */
-.up-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.4;
-  pointer-events: none;
-  z-index: 2;
-  animation: pulseGlow 10s ease-in-out infinite alternate;
-}
-
-.up-glow-1 {
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(147,197,253,0.15) 0%, rgba(255,255,255,0) 70%);
-  top: -10%;
-  left: -10%;
-}
-
-.up-glow-2 {
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(167,139,250,0.1) 0%, rgba(255,255,255,0) 70%);
-  bottom: -20%;
-  right: -10%;
-}
-
-@keyframes pulseGlow {
-  0% { transform: scale(1); opacity: 0.3; }
-  100% { transform: scale(1.2); opacity: 0.5; }
-}
-
-/* Particles */
-.up-particles {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.up-particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: rgba(255,255,255,0.5);
-  border-radius: 50%;
-  box-shadow: 0 0 8px 1px rgba(255,255,255,0.8);
-}
-
-/* Generate random particle positions and animations via JS or hardcoded CSS */
-.p-0 { top: 20%; left: 30%; animation: float 15s linear infinite; }
-.p-1 { top: 60%; left: 10%; animation: float 20s linear infinite reverse; }
-.p-2 { top: 80%; left: 80%; animation: float 12s linear infinite; }
-.p-3 { top: 10%; left: 70%; animation: float 18s linear infinite reverse; }
-.p-4 { top: 40%; left: 90%; animation: float 25s linear infinite; }
-.p-5 { top: 50%; left: 45%; animation: float 14s linear infinite reverse; }
-.p-6 { top: 70%; left: 35%; animation: float 22s linear infinite; }
-.p-7 { top: 30%; left: 85%; animation: float 16s linear infinite reverse; }
-/* ... (repeating pattern for simplicity) */
-
-@keyframes float {
-  0% { transform: translateY(0) translateX(0); opacity: 0; }
-  50% { opacity: 0.8; }
-  100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
-}
-
-/* Content Wrapper */
 .up-content-wrapper {
   position: relative;
   z-index: 10;
@@ -119,28 +25,93 @@
   width: 90%;
 }
 
-/* Canvas / 3D */
 .up-canvas-wrapper {
   position: relative;
-  margin-bottom: 0; /* Removed margin since text is gone */
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.up-canvas-glow {
-  position: absolute;
-  width: 60%;
-  height: 60%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  filter: blur(40px);
-  z-index: -1;
-  animation: pulseGlow 4s ease-in-out infinite alternate;
+/* ── CSS Atom Spinner ───────────────────────────────── */
+
+.css-atom-loader {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+@media (min-width: 768px) {
+  .css-atom-loader {
+    width: 140px;
+    height: 140px;
+  }
+}
 
-/* Progress */
+.atom-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+}
+
+.ring-1 {
+  animation: atomSpin1 2.4s linear infinite;
+}
+
+.ring-2 {
+  width: 85%;
+  height: 85%;
+  border-top-color: rgba(139, 92, 246, 0.9);
+  animation: atomSpin2 1.8s linear infinite;
+}
+
+.ring-3 {
+  width: 70%;
+  height: 70%;
+  border-top-color: rgba(6, 182, 212, 0.9);
+  animation: atomSpin3 2.8s linear infinite;
+}
+
+.atom-core {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.6),
+    0 0 40px rgba(139, 92, 246, 0.3),
+    0 0 60px rgba(6, 182, 212, 0.2);
+  animation: atomPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes atomSpin1 {
+  0%   { transform: rotateX(60deg) rotateZ(0deg); }
+  100% { transform: rotateX(60deg) rotateZ(360deg); }
+}
+
+@keyframes atomSpin2 {
+  0%   { transform: rotateX(-30deg) rotateY(45deg) rotateZ(0deg); }
+  100% { transform: rotateX(-30deg) rotateY(45deg) rotateZ(-360deg); }
+}
+
+@keyframes atomSpin3 {
+  0%   { transform: rotateX(45deg) rotateY(-30deg) rotateZ(0deg); }
+  100% { transform: rotateX(45deg) rotateY(-30deg) rotateZ(360deg); }
+}
+
+@keyframes atomPulse {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+/* ── Progress Bar ───────────────────────────────────── */
+
 .up-progress-container {
   width: 100%;
   max-width: 320px;
@@ -191,14 +162,29 @@
   }
 }
 
-
-/* Accessibility Support */
+/* ── Accessibility: Reduced Motion ──────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .up-noise-overlay,
-  .up-glow,
-  .up-canvas-glow,
-  .up-particle,
+  .atom-ring,
+  .atom-core,
   .up-progress-shimmer {
-    animation: none;
+    animation: none !important;
   }
+  .atom-ring {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* ── Page Loader Spinner (used by Suspense fallback) ── */
+.page-loader-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-purple, #8B5CF6);
+  border-radius: 50%;
+  animation: pageLoaderSpin 0.8s linear infinite;
+}
+
+@keyframes pageLoaderSpin {
+  to { transform: rotate(360deg); }
 }

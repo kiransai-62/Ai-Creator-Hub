@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../../components/Button/Button';
 import { api } from '../../lib/api';
 import './SettingsSubScreens.css';
@@ -10,8 +10,9 @@ import type { User } from '@supabase/supabase-js';
 import { 
   BadgeCheck, User as UserIcon, Camera, CreditCard, 
   Download, HelpCircle, Shield, 
-  FileText, ChevronDown, LogOut
+  FileText, ChevronDown, LogOut, Sun, Moon, Check
 } from 'lucide-react';
+import { useTheme } from '../../lib/ThemeContext';
 
 /* ── UI Helpers ──────────────────────────────────────────────────────────── */
 
@@ -398,13 +399,73 @@ export function CopyrightPolicyScreen() {
 /* ── 7. Sign Out Modal ───────────────────────────────────────────────────── */
 
 export function SignOutModal({ onCancel, onConfirm }: { onCancel: () => void, onConfirm: () => void }) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const previousActiveElement = document.activeElement as HTMLElement;
+
+    // Focus Cancel button initially
+    const focusTimer = setTimeout(() => {
+      const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }, 100);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousActiveElement) {
+        previousActiveElement.focus();
+      }
+    };
+  }, [onCancel]);
+
   return (
     <div className="modal-overlay glass-overlay">
-      <div className="modal-card">
+      <div 
+        ref={modalRef} 
+        className="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signout-modal-title"
+      >
         <div className="modal-icon-wrapper danger-glow">
           <LogOut size={28} className="text-danger" />
         </div>
-        <h3 className="modal-title">Sign Out</h3>
+        <h3 id="signout-modal-title" className="modal-title">Sign Out</h3>
         <p className="modal-desc">Are you sure you want to end your session? You will need to log in again to access your library.</p>
         <div className="modal-actions">
           <Button variant="outline" onClick={onCancel} className="flex-1 btn-cancel">Cancel</Button>
@@ -414,3 +475,48 @@ export function SignOutModal({ onCancel, onConfirm }: { onCancel: () => void, on
     </div>
   );
 }
+
+/* ── 8. Theme Settings ───────────────────────────────────────────────────── */
+
+export function ThemeSettingsScreen() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <div className="sub-screen">
+      <SubScreenHeader 
+        title="Theme Settings" 
+        icon={Shield} 
+        description="Customize how AI Creator Hub looks on your device." 
+      />
+      
+      <div className="theme-grid">
+        <button 
+          className={`theme-card ${theme === 'light' ? 'active' : ''}`}
+          onClick={() => setTheme('light')}
+        >
+          <div className="theme-preview light">
+            <Sun size={32} />
+          </div>
+          <span className="theme-label">
+            Light Theme
+            {theme === 'light' && <Check size={16} className="check-icon" />}
+          </span>
+        </button>
+
+        <button 
+          className={`theme-card ${theme === 'dark' ? 'active' : ''}`}
+          onClick={() => setTheme('dark')}
+        >
+          <div className="theme-preview dark">
+            <Moon size={32} />
+          </div>
+          <span className="theme-label">
+            Dark Theme
+            {theme === 'dark' && <Check size={16} className="check-icon" />}
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+

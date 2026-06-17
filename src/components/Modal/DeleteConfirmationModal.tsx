@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 import './DeleteConfirmationModal.css';
@@ -23,6 +24,64 @@ export function DeleteConfirmationModal({
   onConfirm,
   onCancel,
 }: DeleteConfirmationModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Save previous active element to restore later
+    const previousActiveElement = document.activeElement as HTMLElement;
+
+    // Focus the first button inside the modal after brief delay for animation
+    const focusTimer = setTimeout(() => {
+      const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) {
+        // Focus the Cancel button by default
+        focusable[0].focus();
+      }
+    }, 100);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousActiveElement) {
+        previousActiveElement.focus();
+      }
+    };
+  }, [isOpen, onCancel]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -38,7 +97,11 @@ export function DeleteConfirmationModal({
 
           {/* Modal Container */}
           <motion.div
+            ref={modalRef}
             className="delete-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -48,7 +111,7 @@ export function DeleteConfirmationModal({
               <AlertTriangle className="delete-modal-icon" size={28} />
             </div>
 
-            <h3 className="delete-modal-title">{title}</h3>
+            <h3 id="delete-modal-title" className="delete-modal-title">{title}</h3>
             <p className="delete-modal-description">{description}</p>
 
             <div className="delete-modal-actions">
@@ -75,3 +138,4 @@ export function DeleteConfirmationModal({
     </AnimatePresence>
   );
 }
+

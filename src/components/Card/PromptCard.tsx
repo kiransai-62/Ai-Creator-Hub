@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Heart, Copy, Eye, Share2, Trash2, Link2, Check, Edit2 } from 'lucide-react';
+import { getOptimizedImageUrl } from '../../lib/api';
 import './PromptCard.css';
 
 export interface PromptCardProps {
@@ -48,7 +49,7 @@ export function PromptCard({
     <div className={`prompt-card ${className}`} onClick={onClick}>
       <div className="card-image-container">
         {image ? (
-          <img src={image} alt={title} className="card-image" loading="lazy" />
+          <img src={getOptimizedImageUrl(image, 400, 300)} alt={title} className="card-image" loading="lazy" />
         ) : (
           <div className="card-image" style={{ backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
             No Image
@@ -63,12 +64,28 @@ export function PromptCard({
           <div style={{ position: 'relative' }}>
             <button 
               className="pc-action-btn" 
-              onClick={(e) => { 
+              onClick={async (e) => { 
                 e.stopPropagation(); 
                 if (!shareUrl) return;
-                setShowShareMenu(!showShareMenu); 
+                if (navigator.share) {
+                  try {
+                    await navigator.share({
+                      title: title,
+                      text: `Check out this AI prompt on AI Creator Hub: ${title}`,
+                      url: shareUrl
+                    });
+                  } catch (err) {
+                    // Do not show menu on cancel abort
+                    if (err instanceof Error && err.name !== 'AbortError') {
+                      setShowShareMenu(!showShareMenu);
+                    }
+                  }
+                } else {
+                  setShowShareMenu(!showShareMenu); 
+                }
               }}
               title="Share"
+              aria-label="Share prompt"
             >
               <Share2 size={14} className="pc-action-icon" />
             </button>
@@ -85,6 +102,7 @@ export function PromptCard({
                       setShowShareMenu(false);
                     }, 2000);
                   }}
+                  aria-label="Copy prompt link"
                 >
                   {copied ? <Check size={14} /> : <Link2 size={14} />}
                   {copied ? 'Copied!' : 'Copy link'}
@@ -97,6 +115,7 @@ export function PromptCard({
               className="pc-action-btn" 
               onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
               title="Edit"
+              aria-label="Edit prompt"
             >
               <Edit2 size={14} className="pc-action-icon" />
             </button>
@@ -106,6 +125,7 @@ export function PromptCard({
               className="pc-action-btn" 
               onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
               title="Delete"
+              aria-label="Delete prompt"
             >
               <Trash2 size={14} className="pc-action-icon" />
             </button>

@@ -1,4 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap');
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Inter-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Inter-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Inter-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Inter-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/Inter-ExtraBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Outfit-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Outfit-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Outfit-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Outfit-Bold.ttf') format('truetype');
+}
 
 /* ═══════════════════════════════════════════════════════
    DARK THEME (Default Premium)
@@ -28,6 +90,7 @@
   
   /* Brand Accents */
   --accent-purple: #8B5CF6;   /* Violet 500 */
+  --color-primary: var(--accent-purple); /* Define primary brand color */
   --accent-purple-gradient: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
   --accent-purple-light: #C4B5FD;
   --accent-purple-bg: rgba(139, 92, 246, 0.15);
@@ -83,7 +146,7 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
-
+ 
   /* Form Elements */
   --input-bg: rgba(24, 24, 27, 0.6);
   --input-border: rgba(255, 255, 255, 0.1);
@@ -116,6 +179,7 @@
   
   /* Brand Accents */
   --accent-purple: #7C3AED;   /* Violet 600 */
+  --color-primary: var(--accent-purple); /* Define primary brand color */
   --accent-purple-gradient: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
   --accent-purple-light: #6D28D9;
   --accent-purple-bg: rgba(124, 58, 237, 0.1);
@@ -178,15 +242,32 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-*::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+/* Custom modern scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple, #7c3aed);
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) var(--bg-primary);
 }
 
 body {
@@ -280,11 +361,19 @@ button {
 
 /* Legacy mappings for components not yet fully updated */
 .clay-card {
-  @extend .glass-card;
+  /* UI-2: Replaced invalid @extend with direct properties */
   background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.clay-card:hover {
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--shadow-hero);
+  transform: translateY(-2px);
 }
 .clay-panel {
   background: var(--bg-elevated);
@@ -346,3 +435,55 @@ button {
   opacity: 0;
   transition: opacity 200ms;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — Reduced Motion
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOCUS STYLES — Keyboard Navigation
+   ═══════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+}
+
+/* Skip to main content link (screen reader) */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-purple);
+  color: white;
+  padding: 8px 16px;
+  z-index: 10000;
+  border-radius: 0 0 var(--radius-sm) 0;
+  transition: top 0.2s;
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+

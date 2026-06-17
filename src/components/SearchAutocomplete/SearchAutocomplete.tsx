@@ -139,7 +139,7 @@ export function SearchAutocomplete({
                 <div 
                   key={prompt.id} 
                   className="autocomplete-item"
-                  onClick={() => handleResultClick(prompt.id)}
+                  onClick={() => handleResultClick(prompt.slug || prompt.id)}
                 >
                   <div className="autocomplete-item-img">
                     {prompt.image_url ? (

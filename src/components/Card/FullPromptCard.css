@@ -91,6 +91,11 @@
   border-color: var(--color-danger-bg);
 }
 
+.fpc-report-btn:hover {
+  color: var(--color-warning, #f59e0b);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
 .full-prompt-card:hover .fpc-image {
   transform: scale(1.05);
 }

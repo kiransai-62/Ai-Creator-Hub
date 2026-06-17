@@ -28,6 +28,11 @@ export function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             <span>Billing Details</span>
             <ChevronRight size={18} className="text-muted" />
           </button>
+          <div className="divider"></div>
+          <button className="settings-item" onClick={() => onNavigate('theme')}>
+            <span>Theme Settings</span>
+            <ChevronRight size={18} className="text-muted" />
+          </button>
         </div>
       </div>
 

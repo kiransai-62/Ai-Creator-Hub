@@ -45,6 +45,16 @@
   text-align: center;
 }
 
+.login-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 .email-form {
   display: flex;
   flex-direction: column;

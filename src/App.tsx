@@ -1,33 +1,47 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Crown } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from './lib/supabase';
+import { api } from './lib/api';
 import type { User } from '@supabase/supabase-js';
 import './App.css';
 import { SearchAutocomplete } from './components/SearchAutocomplete/SearchAutocomplete';
 import { TopBar } from './components/TopBar/TopBar';
 import { BottomNav } from './components/BottomNav/BottomNav';
-import { HomeScreen } from './screens/Home/HomeScreen';
-import { DetailsScreen } from './screens/Details/DetailsScreen';
-import { SettingsScreen } from './screens/Settings/SettingsScreen';
-import { 
-  EditProfileScreen, 
-  SubscriptionScreen, 
-  BillingDetailsScreen, 
-  HelpCenterScreen, 
-  PrivacyPolicyScreen, 
-  TermsOfServiceScreen,
-  CopyrightPolicyScreen,
-  SignOutModal
-} from './screens/Settings/SettingsSubScreens';
 
-import { ExploreScreen } from './screens/Explore/ExploreScreen';
-import { LibraryScreen } from './screens/Library/LibraryScreen';
-import { LoginScreen } from './screens/Auth/LoginScreen';
-import { DashboardScreen } from './screens/Dashboard/DashboardScreen';
-import { CreatePromptScreen } from './screens/Create/CreatePromptScreen';
-import { AdminScreen } from './screens/Admin/AdminScreen';
+// P-2: Code splitting — lazy load all route-level components
+const HomeScreen = lazy(() => import('./screens/Home/HomeScreen').then(m => ({ default: m.HomeScreen })));
+const DetailsScreen = lazy(() => import('./screens/Details/DetailsScreen').then(m => ({ default: m.DetailsScreen })));
+const SettingsScreen = lazy(() => import('./screens/Settings/SettingsScreen').then(m => ({ default: m.SettingsScreen })));
+const ExploreScreen = lazy(() => import('./screens/Explore/ExploreScreen').then(m => ({ default: m.ExploreScreen })));
+const LibraryScreen = lazy(() => import('./screens/Library/LibraryScreen').then(m => ({ default: m.LibraryScreen })));
+const LoginScreen = lazy(() => import('./screens/Auth/LoginScreen').then(m => ({ default: m.LoginScreen })));
+const DashboardScreen = lazy(() => import('./screens/Dashboard/DashboardScreen').then(m => ({ default: m.DashboardScreen })));
+const CreatePromptScreen = lazy(() => import('./screens/Create/CreatePromptScreen').then(m => ({ default: m.CreatePromptScreen })));
+const AdminScreen = lazy(() => import('./screens/Admin/AdminScreen').then(m => ({ default: m.AdminScreen })));
+const NotFoundScreen = lazy(() => import('./screens/NotFound/NotFoundScreen').then(m => ({ default: m.NotFoundScreen })));
+
+// Lazy load settings sub-screens
+const LazyEditProfileScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.EditProfileScreen })));
+const LazySubscriptionScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.SubscriptionScreen })));
+const LazyBillingDetailsScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.BillingDetailsScreen })));
+const LazyThemeSettingsScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.ThemeSettingsScreen })));
+const LazyHelpCenterScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.HelpCenterScreen })));
+const LazyPrivacyPolicyScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.PrivacyPolicyScreen })));
+const LazyTermsOfServiceScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.TermsOfServiceScreen })));
+const LazyCopyrightPolicyScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.CopyrightPolicyScreen })));
+const LazySignOutModal = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.SignOutModal })));
+
+// Suspense fallback
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-muted)' }}>
+      <div className="page-loader-spinner" />
+    </div>
+  );
+}
 
 interface ProtectedRouteProps {
   session: User | null;
@@ -45,6 +59,7 @@ function ProtectedRoute({ session, children }: ProtectedRouteProps) {
 
 function App() {
   const [session, setSession] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showSignOut, setShowSignOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,16 +70,14 @@ function App() {
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
+  // S-1: Check admin status from database instead of hardcoded email
   useEffect(() => {
-    const path = location.pathname;
-    let title = 'AI Creator Hub – AI Prompt Marketplace';
-    if (path.startsWith('/explore')) {
-      title = 'Explore Visual AI Prompts | AI Creator Hub';
-    } else if (path.startsWith('/dashboard') || path.startsWith('/settings/edit-profile')) {
-      title = 'Creator Profile | AI Creator Hub';
+    if (session?.id) {
+      api.isUserAdmin(session.id).then(result => setIsAdmin(result));
+    } else {
+      setIsAdmin(false);
     }
-    document.title = title;
-  }, [location]);
+  }, [session?.id]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -110,6 +123,7 @@ function App() {
     if (path.includes('/edit-profile')) return 'Edit Profile';
     if (path.includes('/subscription')) return 'Subscription';
     if (path.includes('/billing')) return 'Billing Details';
+    if (path.includes('/theme')) return 'Theme Settings';
     if (path.includes('/help-center')) return 'Help Center';
     if (path.includes('/privacy-policy')) return 'Privacy Policy';
     if (path.includes('/terms-of-service')) return 'Terms of Service';
@@ -134,12 +148,9 @@ function App() {
       sessionStorage.removeItem('returnPath');
       navigate(returnPath, { replace: true });
     } else {
-      const isAdmin = session?.email === 'sunnykiran715@gmail.com';
-      if (isAdmin) {
-        navigate('/admin', { replace: true });
-      } else {
-        navigate('/explore', { replace: true });
-      }
+      // After admin check completes asynchronously, the admin redirect
+      // is handled by the AdminScreen itself. Default to explore.
+      navigate('/explore', { replace: true });
     }
   };
 
@@ -155,39 +166,54 @@ function App() {
 
   const getTopBarVariant = () => {
     const path = location.pathname;
-    if (path.startsWith('/admin')) return 'admin'; // hide topbar if needed or handle differently
+    if (path.startsWith('/admin')) return 'admin';
     if (path === '/') return 'home';
     if (path === '/settings') return 'settings-root';
     if (path.startsWith('/settings/')) return 'settings';
     if (path === '/explore') return 'explore';
     if (path === '/library') return 'library';
     if (path === '/dashboard') return 'dashboard';
-    if (path === '/create') return 'details'; // Use details top bar (with back button)
+    if (path === '/create') return 'details';
     if (path.startsWith('/details/')) return 'details';
     return 'home';
   };
 
-  // If the path is /login, render LoginScreen standalone, matching original behavior
+  // If the path is /login, render LoginScreen standalone
   if (location.pathname === '/login') {
     return (
-      <LoginScreen 
-        onSuccess={handleLoginSuccess} 
-      />
+      <Suspense fallback={<PageLoader />}>
+        <LoginScreen 
+          onSuccess={handleLoginSuccess} 
+        />
+      </Suspense>
     );
   }
 
-  // If the path is /admin, we can skip the standard TopBar and BottomNav if we want.
-  // Actually, AdminScreen has its own sidebar, so we should completely render just AdminScreen for /admin.
-  if (location.pathname === '/admin') {
+  // F-11: Use startsWith for admin route matching (supports sub-paths)
+  if (location.pathname.startsWith('/admin')) {
     return (
       <ProtectedRoute session={session}>
-        <AdminScreen user={session} />
+        <Helmet>
+          <title>Admin Dashboard | AI Creator Hub</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <Suspense fallback={<PageLoader />}>
+          <AdminScreen user={session} isAdmin={isAdmin} />
+        </Suspense>
       </ProtectedRoute>
     );
   }
 
   return (
     <div className="app-container">
+      <Helmet>
+        <title>AI Creator Hub – AI Prompt Marketplace</title>
+        <meta name="description" content="Discover, upload, browse, save, and copy high-quality AI prompts for Midjourney, ChatGPT, Stable Diffusion, and more." />
+        <meta property="og:title" content="AI Creator Hub – AI Prompt Marketplace" />
+        <meta property="og:description" content="Discover, upload, browse, save, and copy high-quality AI prompts for Midjourney, ChatGPT, Stable Diffusion, and more." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <TopBar 
         variant={getTopBarVariant()} 
         title={location.pathname === '/create' ? '👑 Create' : location.pathname.startsWith('/settings') ? getSettingsTitle() : undefined}
@@ -200,7 +226,7 @@ function App() {
             handleLoginRedirect();
           }
         }}
-        isAdmin={session?.email === 'sunnykiran715@gmail.com'}
+        isAdmin={isAdmin}
         onCreateClick={() => navigate('/create')}
       />
       
@@ -208,7 +234,7 @@ function App() {
         <div className={`search-bar-row ${location.pathname === '/' ? 'home' : ''}`}>
           <div className="search-box-container">
             <SearchAutocomplete initialValue={searchQuery} />
-            {session?.email === 'sunnykiran715@gmail.com' && (
+            {isAdmin && (
               <button className="create-prompt-btn" onClick={() => navigate('/create')}>
                 <Crown size={16} className="create-prompt-icon" />
                 Create
@@ -218,88 +244,96 @@ function App() {
         </div>
       )}
       
-      <Routes>
-        <Route path="/" element={<HomeScreen onCardClick={handleCardClick} onExploreClick={handleExploreClick} userId={session?.id} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />} />
-        <Route path="/explore" element={<ExploreScreen onCopy={handleCopyPrompt} isAuthenticated={!!session} onLogin={handleLoginRedirect} userId={session?.id} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />} />
-        <Route path="/details/:id" element={
-          <ProtectedRoute session={session}>
-            <DetailsScreen onCopy={handleCopyPrompt} isAuthenticated={!!session} onLogin={handleLoginRedirect} userId={session?.id} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />
-          </ProtectedRoute>
-        } />
-        
-        {/* Protected Routes */}
-        <Route path="/library" element={
-          <ProtectedRoute session={session}>
-            <LibraryScreen onCardClick={handleCardClick} userId={session?.id} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/dashboard" element={
-          <ProtectedRoute session={session}>
-            <DashboardScreen user={session} onNavigate={(s) => {
-              if (s === 'library') {
-                navigate('/library');
-              } else if (s === 'edit-profile') {
-                navigate('/settings/edit-profile');
-              } else if (s === 'settings') {
-                navigate('/settings');
-              }
-            }} />
-          </ProtectedRoute>
-        } />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<HomeScreen onCardClick={handleCardClick} onExploreClick={handleExploreClick} userId={session?.id} isAdmin={isAdmin} />} />
+          <Route path="/explore" element={<ExploreScreen onCopy={handleCopyPrompt} isAuthenticated={!!session} onLogin={handleLoginRedirect} userId={session?.id} isAdmin={isAdmin} />} />
+          
+          {/* Prompt detail page is now PUBLIC for SEO and discovery */}
+          <Route path="/details/:id" element={
+            <DetailsScreen onCopy={handleCopyPrompt} isAuthenticated={!!session} onLogin={handleLoginRedirect} userId={session?.id} isAdmin={isAdmin} />
+          } />
+          
+          {/* Protected Routes */}
+          <Route path="/library" element={
+            <ProtectedRoute session={session}>
+              <LibraryScreen onCardClick={handleCardClick} userId={session?.id} isAdmin={isAdmin} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/dashboard" element={
+            <ProtectedRoute session={session}>
+              <DashboardScreen user={session} onNavigate={(s) => {
+                if (s === 'library') {
+                  navigate('/library');
+                } else if (s === 'edit-profile') {
+                  navigate('/settings/edit-profile');
+                } else if (s === 'settings') {
+                  navigate('/settings');
+                }
+              }} />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/create" element={
-          <ProtectedRoute session={session}>
-            <CreatePromptScreen user={session} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />
-          </ProtectedRoute>
-        } />
-        
-        {/* Settings Root and Subpages */}
-        <Route path="/settings" element={
-          <ProtectedRoute session={session}>
-            <SettingsScreen onNavigate={(screenId) => {
-              if (screenId === 'sign-out') {
-                setShowSignOut(true);
-              } else {
-                navigate(`/settings/${screenId}`);
-              }
-            }} />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/settings/edit-profile" element={
-          <ProtectedRoute session={session}>
-            <EditProfileScreen user={session} />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/settings/subscription" element={
-          <ProtectedRoute session={session}>
-            <SubscriptionScreen />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/settings/billing" element={
-          <ProtectedRoute session={session}>
-            <BillingDetailsScreen />
-          </ProtectedRoute>
-        } />
+          <Route path="/create" element={
+            <ProtectedRoute session={session}>
+              <CreatePromptScreen user={session} isAdmin={isAdmin} />
+            </ProtectedRoute>
+          } />
+          
+          {/* Settings Root and Subpages */}
+          <Route path="/settings" element={
+            <ProtectedRoute session={session}>
+              <SettingsScreen onNavigate={(screenId) => {
+                if (screenId === 'sign-out') {
+                  setShowSignOut(true);
+                } else {
+                  navigate(`/settings/${screenId}`);
+                }
+              }} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/settings/edit-profile" element={
+            <ProtectedRoute session={session}>
+              <LazyEditProfileScreen user={session} />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/settings/subscription" element={
+            <ProtectedRoute session={session}>
+              <LazySubscriptionScreen />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/settings/billing" element={
+            <ProtectedRoute session={session}>
+              <LazyBillingDetailsScreen />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/settings/theme" element={
+            <ProtectedRoute session={session}>
+              <LazyThemeSettingsScreen />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/edit/:id" element={
-          <ProtectedRoute session={session}>
-            <CreatePromptScreen user={session} isAdmin={session?.email === 'sunnykiran715@gmail.com'} />
-          </ProtectedRoute>
-        } />
-        
-        {/* Public Settings Subpages */}
-        <Route path="/settings/help-center" element={<HelpCenterScreen />} />
-        <Route path="/settings/privacy-policy" element={<PrivacyPolicyScreen />} />
-        <Route path="/settings/terms-of-service" element={<TermsOfServiceScreen />} />
-        <Route path="/settings/copyright-policy" element={<CopyrightPolicyScreen />} />
-        
-        {/* Fallback to Home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="/edit/:id" element={
+            <ProtectedRoute session={session}>
+              <CreatePromptScreen user={session} isAdmin={isAdmin} />
+            </ProtectedRoute>
+          } />
+          
+          {/* Public Settings Subpages */}
+          <Route path="/settings/help-center" element={<LazyHelpCenterScreen />} />
+          <Route path="/settings/privacy-policy" element={<LazyPrivacyPolicyScreen />} />
+          <Route path="/settings/terms-of-service" element={<LazyTermsOfServiceScreen />} />
+          <Route path="/settings/copyright-policy" element={<LazyCopyrightPolicyScreen />} />
+          
+          {/* Fallback to 404 */}
+          <Route path="*" element={<NotFoundScreen />} />
+        </Routes>
+      </Suspense>
       
       {getCurrentTab() !== '' && (
         <BottomNav 
@@ -314,14 +348,16 @@ function App() {
       )}
 
       {showSignOut && (
-        <SignOutModal 
-          onCancel={() => setShowSignOut(false)} 
-          onConfirm={async () => {
-            await supabase.auth.signOut();
-            setShowSignOut(false);
-            navigate('/login');
-          }} 
-        />
+        <Suspense fallback={null}>
+          <LazySignOutModal 
+            onCancel={() => setShowSignOut(false)} 
+            onConfirm={async () => {
+              await supabase.auth.signOut();
+              setShowSignOut(false);
+              navigate('/login');
+            }} 
+          />
+        </Suspense>
       )}
     </div>
   );

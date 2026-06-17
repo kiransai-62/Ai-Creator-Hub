@@ -62,7 +62,7 @@ export function DashboardScreen({ user, onNavigate }: DashboardScreenProps) {
   const draftCount = prompts.filter(p => p.status === 'draft').length;
 
   return (
-    <div className="dashboard-screen" style={{ overflowY: 'auto' }}>
+    <div className="dashboard-screen">
       <div className="dashboard-header">
         <div className="profile-info">
           <div className="avatar-large">
@@ -103,79 +103,79 @@ export function DashboardScreen({ user, onNavigate }: DashboardScreenProps) {
         </div>
       </div>
 
-      <div className="dashboard-menu mb-6" style={{ display: 'flex', gap: '12px', overflowX: 'auto' }}>
+      <div className="dashboard-menu mb-6 menu-row">
         {isAdmin && (
-          <button className={`menu-item ${activeTab === 'published' ? 'active' : ''}`} onClick={() => setActiveTab('published')} style={{ minWidth: '120px', justifyContent: 'center', background: activeTab === 'published' ? 'var(--bg-secondary)' : 'transparent' }}>
+          <button className={`menu-item menu-item-tab ${activeTab === 'published' ? 'active' : ''}`} onClick={() => setActiveTab('published')}>
             <div className="menu-icon"><BookOpen size={18} /></div>
             <span>Published</span>
           </button>
         )}
-        <button className={`menu-item ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')} style={{ minWidth: '120px', justifyContent: 'center', background: activeTab === 'saved' ? 'var(--bg-secondary)' : 'transparent' }}>
+        <button className={`menu-item menu-item-tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
           <div className="menu-icon"><Heart size={18} /></div>
           <span>Saved</span>
         </button>
-        <button className={`menu-item ${activeTab === 'copied' ? 'active' : ''}`} onClick={() => setActiveTab('copied')} style={{ minWidth: '120px', justifyContent: 'center', background: activeTab === 'copied' ? 'var(--bg-secondary)' : 'transparent' }}>
+        <button className={`menu-item menu-item-tab ${activeTab === 'copied' ? 'active' : ''}`} onClick={() => setActiveTab('copied')}>
           <div className="menu-icon"><Copy size={18} /></div>
           <span>Copied</span>
         </button>
       </div>
 
-      <div className="dashboard-menu mb-6" style={{ display: 'flex', gap: '12px' }}>
-        <button className="menu-item" onClick={() => onNavigate('edit-profile')} style={{ flex: 1, justifyContent: 'center' }}>
+      <div className="dashboard-menu mb-6 menu-row">
+        <button className="menu-item menu-item-half" onClick={() => onNavigate('edit-profile')}>
           <div className="menu-icon"><UserIcon size={18} /></div>
           <span>Profile</span>
         </button>
-        <button className="menu-item" onClick={() => onNavigate('settings')} style={{ flex: 1, justifyContent: 'center' }}>
+        <button className="menu-item menu-item-half" onClick={() => onNavigate('settings')}>
           <div className="menu-icon"><Settings size={18} /></div>
           <span>Settings</span>
         </button>
       </div>
 
-      <div className="my-prompts-section" style={{ padding: '0 20px 100px 20px' }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>
+      <div className="my-prompts-section">
+        <h2 className="prompts-section-title">
           {activeTab === 'published' ? 'My Published Prompts' : activeTab === 'saved' ? 'My Saved Prompts' : 'My Copied Prompts'}
         </h2>
         {loading ? (
-          <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+          <p className="prompt-loading-text">Loading...</p>
         ) : prompts.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Nothing to show here yet.</p>
+          <p className="prompt-empty-text">Nothing to show here yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="prompt-list-container">
             {prompts.map(prompt => (
-              <div key={prompt.id} style={{ display: 'flex', alignItems: 'center', padding: 12, backgroundColor: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', gap: 12 }}>
+              <div key={prompt.id} className="dashboard-prompt-item">
                 {prompt.image_url ? (
-                  <img src={prompt.image_url} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }} />
+                  <img src={prompt.image_url} alt="" className="dashboard-prompt-thumb" />
                 ) : (
-                  <div style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="dashboard-prompt-thumb-fallback">
                     <ImageIcon size={20} color="var(--text-muted)" />
                   </div>
                 )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prompt.title}</h4>
-                  <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
+                <div className="prompt-item-details">
+                  <h4 className="prompt-item-title">{prompt.title}</h4>
+                  <p className="prompt-item-subtitle">
                     {activeTab === 'published' ? (prompt.status === 'published' ? 'Published' : 'Draft') : (prompt.author?.username ? `@${prompt.author.username}` : (prompt.author?.full_name || 'Anonymous'))}
                   </p>
                 </div>
                 {activeTab === 'published' ? (
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="prompt-item-actions">
                     <button 
                       onClick={() => navigate(`/edit/${prompt.id}`)}
-                      style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text-primary)' }}
+                      className="btn-edit-prompt"
                     >
                       <Edit3 size={16} />
                     </button>
                     <button 
                       onClick={() => setDeletingId(prompt.id)}
-                      style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--color-danger)' }}
+                      className="btn-delete-prompt"
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="prompt-item-actions">
                     <button 
                       onClick={() => navigate(`/details/${prompt.id}`)}
-                      style={{ background: 'var(--color-primary)', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', color: 'white', fontWeight: 600, fontSize: 14 }}
+                      className="btn-view-prompt"
                     >
                       View
                     </button>

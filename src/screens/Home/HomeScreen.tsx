@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../../components/Button/Button';
 import { PromptCard } from '../../components/Card/PromptCard';
+import { SkeletonCard } from '../../components/Card/SkeletonCard';
 import { api, type PromptWithAuthor } from '../../lib/api';
 import { DeleteConfirmationModal } from '../../components/Modal/DeleteConfirmationModal';
 import './HomeScreen.css';
@@ -42,7 +43,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
         const [trendingData, copiedData, viewedData] = await Promise.all([
           api.getTrendingPrompts(5),
           api.getMostCopiedPrompts(5),
-          api.getTrendingPrompts(5) // For demo, using same endpoint for most viewed
+          api.getMostViewedPrompts(5)
         ]);
         setTrending(trendingData);
         setMostCopied(copiedData);
@@ -91,6 +92,16 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
     }
   };
 
+  const renderSkeletons = () => (
+    <div style={{ display: 'flex', gap: '20px', width: '100%', overflow: 'hidden', padding: '4px 0' }}>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} style={{ minWidth: '280px', width: '280px', flexShrink: 0 }}>
+          <SkeletonCard />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <motion.div 
       className="home-screen"
@@ -130,6 +141,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
             variants={itemVariants}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(`/explore?q=${encodeURIComponent(cat)}`)}
           >
             {cat}
           </motion.button>
@@ -148,12 +160,12 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
             <Flame size={22} className="icon-fire" />
             <h2>Trending Today</h2>
           </div>
-          <button className="view-all">View all</button>
+          <button className="view-all" onClick={() => navigate('/explore')}>View all</button>
         </div>
         
         <div className="horizontal-scroll">
           {loading ? (
-            <div className="feed-empty">Loading...</div>
+            renderSkeletons()
           ) : trending.length > 0 ? (
             trending.map((prompt, index) => (
               <motion.div 
@@ -169,10 +181,10 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   statValue={formatStat(prompt.likes_count)}
                   statIcon="heart"
                   statPosition="top-right"
-                  onClick={() => onCardClick(prompt.id)}
+                  onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  shareUrl={`${window.location.origin}/details/${prompt.id}`}
+                  shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
                 />
@@ -196,12 +208,12 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
             <Star size={22} className="icon-star" />
             <h2>Most Copied</h2>
           </div>
-          <button className="view-all">View all</button>
+          <button className="view-all" onClick={() => navigate('/explore')}>View all</button>
         </div>
         
         <div className="horizontal-scroll">
           {loading ? (
-            <div className="feed-empty">Loading...</div>
+            renderSkeletons()
           ) : mostCopied.length > 0 ? (
             mostCopied.map((prompt, index) => (
               <motion.div 
@@ -213,13 +225,14 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                 <PromptCard 
                   image={prompt.image_url || ''}
                   title={prompt.title}
+                  author={prompt.author?.username || prompt.author?.full_name || 'Anonymous'}
                   statValue={formatStat(prompt.copies_count)}
                   statIcon="copy"
                   statPosition="bottom-left"
-                  onClick={() => onCardClick(prompt.id)}
+                  onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  shareUrl={`${window.location.origin}/details/${prompt.id}`}
+                  shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
                 />
@@ -243,12 +256,12 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
             <Eye size={22} className="icon-eye" />
             <h2>Most Viewed</h2>
           </div>
-          <button className="view-all">View all</button>
+          <button className="view-all" onClick={() => navigate('/explore')}>View all</button>
         </div>
         
         <div className="horizontal-scroll">
           {loading ? (
-            <div className="feed-empty">Loading...</div>
+            renderSkeletons()
           ) : mostViewed.length > 0 ? (
             mostViewed.map((prompt, index) => (
               <motion.div 
@@ -264,10 +277,10 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   statValue={formatStat(prompt.views_count)}
                   statIcon="eye"
                   statPosition="top-left"
-                  onClick={() => onCardClick(prompt.id)}
+                  onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  shareUrl={`${window.location.origin}/details/${prompt.id}`}
+                  shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
                 />

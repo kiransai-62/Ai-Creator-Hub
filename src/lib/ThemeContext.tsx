@@ -1,27 +1,33 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-type ThemeMode = 'dark';
+export type ThemeMode = 'dark' | 'light';
 
 interface ThemeContextValue {
   theme: ThemeMode;
-  resolvedTheme: 'dark';
+  resolvedTheme: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }, []);
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('theme-preference') as ThemeMode;
+    return saved === 'light' ? 'light' : 'dark';
+  });
 
-  const setTheme = () => {
-    // No-op since we only support dark theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme-preference', theme);
+  }, [theme]);
+
+  const setTheme = (mode: ThemeMode) => {
+    setThemeState(mode);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme: 'dark', resolvedTheme: 'dark', setTheme }}>
+    <ThemeContext.Provider value={{ theme, resolvedTheme: theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

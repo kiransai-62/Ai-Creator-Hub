@@ -1,0 +1,46 @@
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 12px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-elevated) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-image {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.skeleton-title {
+  height: 18px;
+  border-radius: var(--radius-sm);
+  width: 75%;
+}
+
+.skeleton-text {
+  height: 13px;
+  border-radius: var(--radius-sm);
+  width: 45%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

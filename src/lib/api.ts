@@ -3,8 +3,22 @@ import { supabase } from './supabase';
 import type { Database } from './database.types';
 
 export type Prompt = Database['public']['Tables']['prompts']['Row'];
-export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Category = Database['public']['Tables']['categories']['Row'];
+
+export interface Profile {
+  id: string;
+  created_at: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  subscription_tier: string | null;
+  monthly_credits: number | null;
+  used_credits: number | null;
+  username: string | null;
+  is_admin?: boolean;
+  banned_at?: string | null;
+  ban_reason?: string | null;
+  deleted_at?: string | null;
+}
 
 // To join authors and categories, we need a composite type
 export interface PromptWithAuthor extends Prompt {
@@ -17,14 +31,29 @@ export interface PromptWithAuthor extends Prompt {
     name: string;
     slug: string;
   }[];
+  slug?: string | null;
+  tags?: string[] | null;
+  deleted_at?: string | null;
 }
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 const isValidUUID = (id: string) => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
+export function getOptimizedImageUrl(url: string, width = 400, height = 300) {
+  if (!url) return '';
+  if (url.includes('/storage/v1/object/public/')) {
+    const transformed = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+    return `${transformed}?width=${width}&height=${height}&format=webp&quality=80`;
+  }
+  return url;
+}
+
 export const api = {
-  // Fetch Trending Prompts (highest views)
+
+  // Fetch Trending Prompts (highest likes)
   async getTrendingPrompts(limit = 10): Promise<PromptWithAuthor[]> {
     const { data, error } = await supabase
       .from('prompts')
@@ -33,7 +62,8 @@ export const api = {
         author:profiles!prompts_author_id_fkey(full_name, avatar_url, username)
       `)
       .eq('status', 'published')
-      .order('views_count', { ascending: false })
+      .is('deleted_at', null)
+      .order('likes_count', { ascending: false })
       .limit(limit);
       
     if (error) {
@@ -41,6 +71,26 @@ export const api = {
       return [];
     }
     // Supabase returns foreign joins as arrays or single objects depending on relationship.
+    return (data as unknown) as PromptWithAuthor[];
+  },
+
+  // Fetch Most Viewed Prompts (highest views)
+  async getMostViewedPrompts(limit = 10): Promise<PromptWithAuthor[]> {
+    const { data, error } = await supabase
+      .from('prompts')
+      .select(`
+        *,
+        author:profiles!prompts_author_id_fkey(full_name, avatar_url, username)
+      `)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .order('views_count', { ascending: false })
+      .limit(limit);
+      
+    if (error) {
+      console.error('Error fetching most viewed prompts:', error);
+      return [];
+    }
     return (data as unknown) as PromptWithAuthor[];
   },
 
@@ -53,6 +103,7 @@ export const api = {
         author:profiles!prompts_author_id_fkey(full_name, avatar_url, username)
       `)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('copies_count', { ascending: false })
       .limit(limit);
       
@@ -77,52 +128,49 @@ export const api = {
     return data;
   },
 
-  // Search Prompts (by category slug or text query)
-  async searchPrompts(query = '', categorySlug = ''): Promise<PromptWithAuthor[]> {
-    let data, error;
+  // Search Prompts (by category slug or text query) with proper database-level pagination and filtering
+  async searchPrompts(query = '', categorySlug = '', page = 1, limit = 12): Promise<PromptWithAuthor[]> {
+    const offset = (page - 1) * limit;
+    let queryBuilder;
     
     if (query && query.trim() !== '') {
-      // Use the new typo-tolerant RPC function
-      const res = await (supabase.rpc as any)('search_prompts', { search_term: query.trim() })
+      // Use the typo-tolerant RPC function
+      queryBuilder = (supabase.rpc as any)('search_prompts', { search_term: query.trim() })
         .select(`
           *,
           author:profiles!prompts_author_id_fkey(full_name, avatar_url, username),
           prompt_categories!inner(
-            categories(name, slug)
+            categories!inner(name, slug)
           )
-        `)
-        .limit(20);
-      data = res.data;
-      error = res.error;
+        `);
     } else {
       // Fallback to standard select if no search term
-      const res = await supabase
+      queryBuilder = supabase
         .from('prompts')
         .select(`
           *,
           author:profiles!prompts_author_id_fkey(full_name, avatar_url, username),
           prompt_categories!inner(
-            categories(name, slug)
+            categories!inner(name, slug)
           )
         `)
         .eq('status', 'published')
-        .limit(20);
-      data = res.data;
-      error = res.error;
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
     }
+
+    if (categorySlug && categorySlug !== 'all') {
+      queryBuilder = queryBuilder.eq('prompt_categories.categories.slug', categorySlug);
+    }
+
+    const { data, error } = await queryBuilder.range(offset, offset + limit - 1);
 
     if (error) {
       console.error('Error searching prompts:', error);
       return [];
     }
     
-    let results = (data as unknown) as any[];
-    
-    if (categorySlug && categorySlug !== 'all') {
-       results = results.filter(p => 
-         p.prompt_categories.some((pc: any) => pc.categories.slug === categorySlug)
-       );
-    }
+    const results = (data as unknown) as any[];
     
     return results.map(p => ({
       ...p,
@@ -225,11 +273,12 @@ export const api = {
       .filter(Boolean) as PromptWithAuthor[];
   },
 
-  // Fetch a single prompt by ID
-  async getPromptDetails(id: string): Promise<PromptWithAuthor | null> {
-    if (!isValidUUID(id)) return null;
+  // Fetch a single prompt by ID or slug
+  async getPromptDetails(idOrSlug: string): Promise<PromptWithAuthor | null> {
+    if (!idOrSlug) return null;
 
-    const { data, error } = await supabase
+    const isUuid = isValidUUID(idOrSlug);
+    const queryBuilder = supabase
       .from('prompts')
       .select(`
         *,
@@ -238,11 +287,15 @@ export const api = {
           categories(id, name, slug)
         )
       `)
-      .eq('id', id)
-      .single();
+      .is('deleted_at', null);
+
+    const { data, error } = await (isUuid 
+      ? queryBuilder.eq('id', idOrSlug) 
+      : queryBuilder.eq('slug', idOrSlug)
+    ).maybeSingle();
       
-    if (error) {
-      console.error('Error fetching prompt details:', error);
+    if (error || !data) {
+      console.error('Error fetching prompt details:', error?.message || 'Not found');
       return null;
     }
     
@@ -264,6 +317,7 @@ export const api = {
         prompt_categories!inner(category_id)
       `)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .eq('prompt_categories.category_id', categoryId)
       .neq('id', excludeId)
       .limit(limit);
@@ -328,36 +382,41 @@ export const api = {
     }
   },
 
-  // Increment copies count
-  async incrementCopyCount(id: string, userId?: string) {
+  // F-3: Atomic increment via RPC — proxy through backend for rate limiting
+  async incrementCopyCount(id: string, _userId?: string) {
     if (!isValidUUID(id)) return;
-    
-    const { data } = await supabase.from('prompts').select('copies_count').eq('id', id).maybeSingle();
-    if (data) {
-      const currentCount = (data as any).copies_count || 0;
-      await (supabase.from('prompts').update as any)({ copies_count: currentCount + 1 }).eq('id', id);
-    }
-    
-    // Also track the copy for the user's dashboard if logged in
-    if (userId) {
-      // Ensure the user's profile exists to satisfy the foreign key constraint
-      await (supabase.from('profiles').upsert as any)({ id: userId }, { onConflict: 'id', ignoreDuplicates: true });
-
-      await (supabase.from('user_copies').upsert as any)({
-        user_id: userId,
-        prompt_id: id
-      }, { onConflict: 'user_id,prompt_id', ignoreDuplicates: true });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      await fetch(`${BACKEND_URL}/api/prompts/${id}/copy`, {
+        method: 'POST',
+        headers
+      });
+    } catch (err) {
+      console.error('Error proxying incrementCopyCount:', err);
     }
   },
   
-  // Increment view count
+  // F-3: Atomic increment via RPC
   async incrementViewCount(id: string) {
     if (!isValidUUID(id)) return;
+    // Deduplicate view counts per session
+    const viewKey = `viewed_${id}`;
+    if (sessionStorage.getItem(viewKey)) return;
+    sessionStorage.setItem(viewKey, '1');
     
-    const { data } = await supabase.from('prompts').select('views_count').eq('id', id).maybeSingle();
-    if (data) {
-      const currentCount = (data as any).views_count || 0;
-      await (supabase.from('prompts').update as any)({ views_count: currentCount + 1 }).eq('id', id);
+    try {
+      await fetch(`${BACKEND_URL}/api/prompts/${id}/view`, {
+        method: 'POST'
+      });
+    } catch (err) {
+      console.error('Error proxying incrementViewCount:', err);
     }
   },
 
@@ -432,13 +491,13 @@ export const api = {
     return data.publicUrl;
   },
 
-  async createPrompt(promptData: Partial<Prompt>, categorySlug: string) {
+  async createPrompt(promptData: Partial<Prompt> & { tags?: string[] }, categorySlug: string) {
     // 0. Ensure author profile exists to satisfy foreign key constraint
     if (promptData.author_id) {
       await supabase.from('profiles').upsert({ id: promptData.author_id } as any);
     }
 
-    // 1. Insert prompt
+    // 1. Insert prompt (including tags)
     const { data: prompt, error: promptError } = await supabase
       .from('prompts')
       .insert({
@@ -513,9 +572,9 @@ export const api = {
   },
 
   async deletePrompt(id: string) {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('prompts')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;
@@ -557,5 +616,87 @@ export const api = {
       return [];
     }
     return data as Profile[];
+  },
+
+  // Check if user is admin via database column
+  async isUserAdmin(userId: string): Promise<boolean> {
+    if (!isValidUUID(userId)) return false;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error || !data) return false;
+    return (data as any).is_admin === true;
+  },
+
+  // Ban/suspend user
+  async banUserAdmin(userId: string, reason: string): Promise<void> {
+    if (!isValidUUID(userId)) return;
+    const { error } = await (supabase as any)
+      .from('profiles')
+      .update({
+        banned_at: new Date().toISOString(),
+        ban_reason: reason
+      })
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
+  // Unban user
+  async unbanUserAdmin(userId: string): Promise<void> {
+    if (!isValidUUID(userId)) return;
+    const { error } = await (supabase as any)
+      .from('profiles')
+      .update({
+        banned_at: null,
+        ban_reason: null
+      })
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
+  // Submit report for content moderation
+  async reportPrompt(userId: string, promptId: string, reason: string): Promise<void> {
+    if (!isValidUUID(userId) || !isValidUUID(promptId)) {
+      throw new Error('Invalid UUID format');
+    }
+    const { error } = await (supabase as any)
+      .from('reports')
+      .insert({
+        reporter_id: userId,
+        prompt_id: promptId,
+        reason: reason.trim(),
+        status: 'pending'
+      });
+    if (error) throw error;
+  },
+
+  // Get all reports for admin portal
+  async getAllReportsAdmin(): Promise<any[]> {
+    const { data, error } = await (supabase as any)
+      .from('reports')
+      .select(`
+        *,
+        reporter:profiles!reports_reporter_id_fkey(full_name, username),
+        prompt:prompts(title, status)
+      `)
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching admin reports:', error);
+      return [];
+    }
+    return data;
+  },
+
+  // Update report status
+  async updateReportStatus(reportId: string, status: 'approved' | 'rejected' | 'pending' | 'resolved'): Promise<void> {
+    if (!isValidUUID(reportId)) return;
+    const { error } = await (supabase as any)
+      .from('reports')
+      .update({ status })
+      .eq('id', reportId);
+    if (error) throw error;
   }
 };

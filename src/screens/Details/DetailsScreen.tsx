@@ -3,8 +3,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Eye, Copy, Lock, Sparkles, Check, Heart } from 'lucide-react';
+import { Eye, Copy, Lock, Sparkles, Check, Heart, Flag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '../../components/Button/Button';
 import { Tag } from '../../components/Tag/Tag';
 import { FullPromptCard } from '../../components/Card/FullPromptCard';
@@ -98,6 +99,13 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
     loadData();
   }, [id]);
 
+  useEffect(() => {
+    if (prompt && isAuthenticated && sessionStorage.getItem('pendingCopy') === prompt.id) {
+      sessionStorage.removeItem('pendingCopy');
+      handleCopyClick();
+    }
+  }, [prompt, isAuthenticated]);
+
   const handleCopyClick = async () => {
     if (!prompt) return;
     try {
@@ -116,6 +124,23 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
       }
     } catch (err) {
       console.error('Failed to copy: ', err);
+    }
+  };
+
+  const handleReportClick = async () => {
+    if (!isAuthenticated || !userId) {
+      if (onLogin) onLogin();
+      return;
+    }
+    const reason = window.prompt("Why are you reporting this prompt? (e.g. offensive content, broken prompt, copyright violation)");
+    if (!reason || !reason.trim()) return;
+
+    try {
+      await api.reportPrompt(userId, prompt!.id, reason);
+      alert("Report submitted successfully. Thank you for keeping our community safe.");
+    } catch (err: any) {
+      console.error('Failed to submit report:', err);
+      alert('Failed to submit report: ' + (err.message || err));
     }
   };
 
@@ -169,6 +194,34 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
+      <Helmet>
+        <title>{`${prompt.title} | AI Creator Hub`}</title>
+        <meta name="description" content={`Copy prompt: ${prompt.prompt_text ? prompt.prompt_text.slice(0, 150) : ''}... Discover, share and download AI prompts on AI Creator Hub.`} />
+        <link rel="canonical" href={window.location.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${prompt.title} | AI Creator Hub`} />
+        <meta property="og:description" content={`Get this premium AI prompt: ${prompt.prompt_text ? prompt.prompt_text.slice(0, 150) : ''}...`} />
+        <meta property="og:image" content={prompt.image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${prompt.title} | AI Creator Hub`} />
+        <meta name="twitter:description" content={`Get this premium AI prompt: ${prompt.prompt_text ? prompt.prompt_text.slice(0, 150) : ''}...`} />
+        <meta name="twitter:image" content={prompt.image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            "name": prompt.title,
+            "description": prompt.description || '',
+            "author": { 
+              "@type": "Person", 
+              "name": prompt.author?.full_name || prompt.author?.username || 'AI Creator Hub' 
+            },
+            "datePublished": prompt.created_at,
+            "image": prompt.image_url || ''
+          })}
+        </script>
+      </Helmet>
+
       <div className="details-layout-split">
         <motion.div 
           className="hero-image-wrapper"
@@ -265,6 +318,17 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                   <Heart size={18} fill={isSaved ? "currentColor" : "none"} />
                   {isSaved ? 'Saved' : 'Save'}
                 </Button>
+                {prompt.author_id !== userId && (
+                  <Button 
+                    variant="dimmed" 
+                    className="btn-report"
+                    title="Report Prompt"
+                    onClick={handleReportClick}
+                    style={{ minWidth: '44px', padding: '0 12px' }}
+                  >
+                    <Flag size={18} />
+                  </Button>
+                )}
               </div>
             </motion.div>
           </>
@@ -276,7 +340,10 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
             <h2 className="auth-title">Sign in to view prompt</h2>
             <p className="auth-desc">This is a premium prompt. Sign in to access thousands of curated AI prompts.</p>
             
-            <Button variant="google" fullWidth className="google-btn" onClick={onLogin}>
+            <Button variant="google" fullWidth className="google-btn" onClick={() => {
+              sessionStorage.setItem('pendingCopy', prompt.id);
+              if (onLogin) onLogin();
+            }}>
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" className="google-icon" />
               Continue with Google
             </Button>
@@ -322,9 +389,20 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
+                    showReport={isAuthenticated && rp.author_id !== userId}
                     shareUrl={`${window.location.origin}/details/${rp.id}`}
                     onDelete={() => handleDeleteClick(rp.id)}
                     onEdit={() => navigate(`/edit/${rp.id}`)}
+                    onReport={async () => {
+                      const reason = window.prompt("Why are you reporting this prompt? (e.g. offensive content, broken prompt, copyright violation)");
+                      if (!reason || !reason.trim()) return;
+                      try {
+                        await api.reportPrompt(userId!, rp.id, reason);
+                        alert("Report submitted successfully. Thank you for keeping our community safe.");
+                      } catch (err: any) {
+                        alert("Failed to submit report: " + (err.message || err));
+                      }
+                    }}
                   />
                 </motion.div>
               ))

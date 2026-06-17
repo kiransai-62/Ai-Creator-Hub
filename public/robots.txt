@@ -1,0 +1,10 @@
+# AI Creator Hub - Robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /create
+Disallow: /edit/
+Disallow: /login
+
+Sitemap: https://aicreatorhub.com/sitemap.xml

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { FullPromptCard } from '../../components/Card/FullPromptCard';
 import { api, type PromptWithAuthor, type Category } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import { Loader3D } from '../../components/Loader3D/Loader3D';
+import { SkeletonCard } from '../../components/Card/SkeletonCard';
 import { DeleteConfirmationModal } from '../../components/Modal/DeleteConfirmationModal';
 import './ExploreScreen.css';
 
@@ -41,26 +42,9 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
   const [categories, setCategories] = useState<Category[]>([]);
   const [prompts, setPrompts] = useState<PromptWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [simulatedProgress, setSimulatedProgress] = useState(0);
-  const [showLoader, setShowLoader] = useState(true);
-
-  // Simulate progress for the ultra-premium loader
-  useEffect(() => {
-    if (!showLoader) return;
-    const interval = setInterval(() => {
-      setSimulatedProgress(prev => {
-        if (prev < 90) return prev + Math.random() * 15;
-        return prev;
-      });
-    }, 200);
-    return () => clearInterval(interval);
-  }, [showLoader]);
-
-  useEffect(() => {
-    if (!loading) {
-      setSimulatedProgress(100);
-    }
-  }, [loading]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     async function loadCategories() {
@@ -70,13 +54,20 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
     loadCategories();
   }, []);
 
-  // Load Prompts when query or category changes
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Load Prompts when query, category, or refreshTrigger changes
   useEffect(() => {
     async function fetchPrompts() {
       setLoading(true);
+      setPage(1);
+      setHasMore(true);
       try {
-        const data = await api.searchPrompts(query, activeCategory);
+        const data = await api.searchPrompts(query, activeCategory, 1, 12);
         setPrompts(data);
+        if (data.length < 12) {
+          setHasMore(false);
+        }
       } catch (err) {
         console.error('Failed to search prompts:', err);
       } finally {
@@ -85,8 +76,10 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
     }
     
     fetchPrompts();
+  }, [query, activeCategory, refreshTrigger]);
 
-    // Set up Realtime Subscription for new prompts
+  // Set up Realtime Subscription once on mount
+  useEffect(() => {
     const channel = supabase
       .channel('public:prompts')
       .on(
@@ -98,8 +91,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
           filter: "status=eq.published"
         },
         () => {
-          // A new published prompt was added — re-fetch to get joined author data
-          fetchPrompts();
+          setRefreshTrigger(prev => prev + 1);
         }
       )
       .subscribe();
@@ -107,7 +99,8 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [query, activeCategory]);
+  }, []);
+
 
   const handleCategoryClick = (slug: string) => {
     if (slug === 'all') {
@@ -120,6 +113,24 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
   
   const handleCardClick = (id: string) => {
     navigate(`/details/${id}`);
+  };
+
+  const handleLoadMore = async () => {
+    if (loading || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const data = await api.searchPrompts(query, activeCategory, nextPage, 12);
+      if (data.length < 12) {
+        setHasMore(false);
+      }
+      setPrompts(prev => [...prev, ...data]);
+      setPage(nextPage);
+    } catch (err) {
+      console.error('Failed to load more prompts:', err);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -161,6 +172,11 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
+      <Helmet>
+        <title>{query ? `Search: "${query}" | AI Creator Hub` : 'Explore AI Prompts | AI Creator Hub'}</title>
+        <meta name="description" content={query ? `Search results for "${query}" prompts on AI Creator Hub.` : 'Browse and discover the best AI prompts for Midjourney, ChatGPT, Stable Diffusion, and more.'} />
+        <link rel="canonical" href={window.location.origin + window.location.pathname + (query ? `?q=${encodeURIComponent(query)}` : '')} />
+      </Helmet>
       <div className="search-header">
         <motion.h1 
           className="screen-title mb-4"
@@ -203,8 +219,12 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
       </div>
 
       <div className="feed-container pb-24">
-        {showLoader ? (
-          <Loader3D progress={Math.min(simulatedProgress, 100)} onComplete={() => setShowLoader(false)} />
+        {loading ? (
+          <>
+            {[...Array(8)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </>
         ) : prompts.length > 0 ? (
           <motion.div 
             style={{ display: 'contents' }}
@@ -259,7 +279,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
               {prompts.map((prompt) => (
                 <motion.div 
                   key={prompt.id} 
-                  onClick={() => handleCardClick(prompt.id)} 
+                  onClick={() => handleCardClick(prompt.slug || prompt.id)} 
                   style={{ cursor: 'pointer', marginBottom: 16 }}
                   variants={itemVariants}
                   layoutId={`prompt-card-${prompt.id}`}
@@ -277,7 +297,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
-                    shareUrl={`${window.location.origin}/details/${prompt.id}`}
+                    shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                     onDelete={() => handleDeleteClick(prompt.id)}
                     onEdit={() => navigate(`/edit/${prompt.id}`)}
                   />
@@ -295,6 +315,31 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
           </motion.div>
         )}
       </div>
+
+      {hasMore && prompts.length > 0 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', margin: '20px 0 60px 0' }}>
+          <button 
+            className="btn-load-more" 
+            onClick={handleLoadMore} 
+            disabled={loadingMore}
+            style={{
+              padding: '12px 24px',
+              background: 'var(--accent-purple-gradient)',
+              border: 'none',
+              borderRadius: 'var(--radius-full)',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '15px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-btn-primary)',
+              transition: 'all 0.2s ease',
+              opacity: loadingMore ? 0.7 : 1
+            }}
+          >
+            {loadingMore ? 'Loading...' : 'Load More Prompts'}
+          </button>
+        </div>
+      )}
 
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
