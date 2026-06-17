@@ -1,0 +1,12 @@
+# Dependency directories
+node_modules/
+
+# Production build output
+dist/
+
+# Local env files
+.env
+.env.local
+
+# Test outputs
+testsprite_tests/tmp/
