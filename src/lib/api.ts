@@ -481,7 +481,10 @@ export const api = {
 
     const { error: uploadError } = await supabase.storage
       .from('prompt-thumbnails')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '31536000',
+        upsert: true
+      });
 
     if (uploadError) {
       console.error('Error uploading thumbnail:', uploadError);
