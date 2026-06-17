@@ -81,17 +81,30 @@ function App() {
       console.log('[Admin Failsafe] email:', session.email, 'id:', session.id, 'match:', isHardcodedAdmin);
       if (isHardcodedAdmin) {
         setIsAdmin(true);
+        (window as any).__isAdmin = true;
       }
       // Also check database for role-based admin
       api.isUserAdmin(session.id).then(result => {
         console.log('[Admin Check] DB result:', result, 'Email:', session.email);
-        setIsAdmin(result || isHardcodedAdmin);
+        const checkResult = result || isHardcodedAdmin;
+        setIsAdmin(checkResult);
+        if (checkResult) {
+          (window as any).__isAdmin = true;
+        } else {
+          (window as any).__isAdmin = false;
+        }
       }).catch(err => {
         console.error('[Admin Check] DB query failed, using fallback:', err);
         setIsAdmin(isHardcodedAdmin);
+        if (isHardcodedAdmin) {
+          (window as any).__isAdmin = true;
+        } else {
+          (window as any).__isAdmin = false;
+        }
       });
     } else {
       setIsAdmin(false);
+      (window as any).__isAdmin = false;
     }
   }, [session?.id, session?.email]);
 

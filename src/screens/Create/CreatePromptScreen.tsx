@@ -173,10 +173,16 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
     if (!user) return;
     setError(null);
     
-    console.log('[Create] Validating:', { title: title.trim(), category, promptText: promptText.trim(), categoriesList: categoriesList.length });
+    if (isAdmin) {
+      console.log('[Create] Validating:', { title: title.trim(), category, promptText: promptText.trim(), categoriesList: categoriesList.length });
+    }
     
     if (!title.trim() || !promptText.trim() || !category) {
-      setError(`Please fill in all required fields (Title, Category, and Prompt Text). [Debug: title="${title.trim()}", category="${category}", prompt="${promptText.trim().substring(0, 20)}..."]`);
+      if (isAdmin) {
+        setError(`Please fill in all required fields (Title, Category, and Prompt Text). [Debug: title="${title.trim()}", category="${category}", prompt="${promptText.trim().substring(0, 20)}..."]`);
+      } else {
+        setError("Please fill in all required fields (Title, Category, and Prompt Text).");
+      }
       return;
     }
     
