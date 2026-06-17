@@ -10,6 +10,7 @@ export interface PromptCardProps {
   statValue: string | number;
   statIcon: 'heart' | 'copy' | 'eye';
   statPosition: 'top-right' | 'bottom-left' | 'top-left';
+  aspectRatio?: string;
   onClick?: () => void;
   className?: string;
   showDelete?: boolean;
@@ -27,6 +28,7 @@ export function PromptCard({
   statValue,
   statIcon,
   statPosition,
+  aspectRatio = '4/5',
   onClick,
   className = '',
   showDelete,
@@ -49,7 +51,7 @@ export function PromptCard({
 
   return (
     <div className={`prompt-card ${className}`} onClick={onClick}>
-      <div className="card-image-container">
+      <div className="card-image-container" style={{ aspectRatio }}>
         {image ? (
           <img src={getOptimizedImageUrl(image, 400, 300)} alt={title} className="card-image" loading="lazy" />
         ) : (

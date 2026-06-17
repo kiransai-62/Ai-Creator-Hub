@@ -25,6 +25,7 @@ interface FullPromptCardProps {
   onDelete?: () => void;
   onEdit?: () => void;
   onReport?: () => void;
+  aspectRatio?: string;
 }
 
 export function FullPromptCard({ 
@@ -45,7 +46,8 @@ export function FullPromptCard({
   shareUrl,
   onDelete,
   onEdit,
-  onReport
+  onReport,
+  aspectRatio = '4/5'
 }: FullPromptCardProps) {
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -65,7 +67,7 @@ export function FullPromptCard({
   };
   return (
     <div className="full-prompt-card">
-      <div className="fpc-image-wrapper">
+      <div className="fpc-image-wrapper" style={{ aspectRatio }}>
         {image ? (
           <img src={getOptimizedImageUrl(image, 800, 600)} alt={title} className="fpc-image" loading="lazy" />
         ) : (

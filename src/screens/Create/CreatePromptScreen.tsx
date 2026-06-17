@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ImagePlus, Info, Eye, CheckCircle, Loader2, Rocket, Edit2 } from 'lucide-react';
+import { ImagePlus, Info, Eye, CheckCircle, Loader2, Rocket, Edit2, Ratio } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { api } from '../../lib/api';
 import { PromptCard } from '../../components/Card/PromptCard';
@@ -28,6 +28,7 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
   const [price, setPrice] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('4/5');
   const [isPublic, setIsPublic] = useState(true);
 
   // Screen layout tab state: 'edit' or 'preview'
@@ -54,6 +55,9 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
           }
           setPromptText(prompt.prompt_text);
           setDescription(prompt.description || '');
+          if ((prompt as any).aspect_ratio) {
+            setAspectRatio((prompt as any).aspect_ratio);
+          }
           setPrice(prompt.price ? `$${prompt.price}` : '');
           setIsPublic(prompt.status === 'published');
           if (prompt.image_url) {
@@ -169,8 +173,10 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
     if (!user) return;
     setError(null);
     
+    console.log('[Create] Validating:', { title: title.trim(), category, promptText: promptText.trim(), categoriesList: categoriesList.length });
+    
     if (!title.trim() || !promptText.trim() || !category) {
-      setError('Please fill in all required fields (Title, Category, and Prompt Text).');
+      setError(`Please fill in all required fields (Title, Category, and Prompt Text). [Debug: title="${title.trim()}", category="${category}", prompt="${promptText.trim().substring(0, 20)}..."]`);
       return;
     }
     
@@ -199,7 +205,8 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
         status,
         price: parseFloat(price.replace('$', '').trim()) || 0,
         is_premium: parseFloat(price.replace('$', '').trim()) > 0,
-        tags: parsedTags
+        tags: parsedTags,
+        aspect_ratio: aspectRatio
       };
 
       // 3. Create or update prompt
@@ -395,6 +402,37 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                 />
+              </div>
+            </div>
+
+            {/* Aspect Ratio Selector */}
+            <div className="form-group">
+              <div className="label-row">
+                <div className="label-with-icon">
+                  <label className="form-label">Image Ratio</label>
+                  <Ratio size={14} className="info-icon" />
+                </div>
+              </div>
+              <div className="ratio-selector">
+                {[
+                  { value: '1/1', label: '1:1', desc: 'Square' },
+                  { value: '4/5', label: '4:5', desc: 'Portrait' },
+                  { value: '9/16', label: '9:16', desc: 'Story' },
+                  { value: '16/9', label: '16:9', desc: 'Wide' },
+                  { value: '4/3', label: '4:3', desc: 'Classic' },
+                  { value: '3/2', label: '3:2', desc: 'Photo' },
+                ].map(r => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    className={`ratio-btn ${aspectRatio === r.value ? 'active' : ''}`}
+                    onClick={() => setAspectRatio(r.value)}
+                  >
+                    <div className="ratio-preview" style={{ aspectRatio: r.value }} />
+                    <span className="ratio-label">{r.label}</span>
+                    <span className="ratio-desc">{r.desc}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

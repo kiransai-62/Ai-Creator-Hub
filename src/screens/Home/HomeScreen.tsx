@@ -181,6 +181,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   statValue={formatStat(prompt.likes_count)}
                   statIcon="heart"
                   statPosition="top-right"
+                  aspectRatio={(prompt as any).aspect_ratio || '4/5'}
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
@@ -230,6 +231,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   statValue={formatStat(prompt.copies_count)}
                   statIcon="copy"
                   statPosition="bottom-left"
+                  aspectRatio={(prompt as any).aspect_ratio || '4/5'}
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
@@ -279,6 +281,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   statValue={formatStat(prompt.views_count)}
                   statIcon="eye"
                   statPosition="top-left"
+                  aspectRatio={(prompt as any).aspect_ratio || '4/5'}
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}

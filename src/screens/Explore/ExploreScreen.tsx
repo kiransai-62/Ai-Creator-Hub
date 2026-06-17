@@ -301,6 +301,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
                     shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                     onDelete={() => handleDeleteClick(prompt.id)}
                     onEdit={() => navigate(`/edit/${prompt.id}`)}
+                    aspectRatio={(prompt as any).aspect_ratio || '4/5'}
                   />
                 </motion.div>
               ))}

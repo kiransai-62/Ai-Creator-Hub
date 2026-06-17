@@ -42,12 +42,9 @@ const isValidUUID = (id: string) => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
-export function getOptimizedImageUrl(url: string, width = 400, height = 300) {
+export function getOptimizedImageUrl(url: string, _width = 400, _height = 300) {
   if (!url) return '';
-  if (url.includes('/storage/v1/object/public/')) {
-    const transformed = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-    return `${transformed}?width=${width}&height=${height}&format=webp&quality=80`;
-  }
+  // Return raw public URL directly — Supabase image transforms require paid plan
   return url;
 }
 
