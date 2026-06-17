@@ -38,7 +38,10 @@ function loadEnv() {
 const env = loadEnv();
 const supabaseUrl = env.VITE_SUPABASE_URL;
 const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY;
-const frontendUrl = env.FRONTEND_URL || 'https://aicreatorhub.com';
+let frontendUrl = env.FRONTEND_URL || env.URL || 'https://aicreatorhub.com';
+if (frontendUrl.endsWith('/')) {
+  frontendUrl = frontendUrl.slice(0, -1);
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase URL or Anon Key. Aborting pre-rendering.');
@@ -340,6 +343,23 @@ async function start() {
   
   fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
   console.log('✅ Generated dynamic sitemap.xml successfully.');
+
+  // 5. Generate dynamic robots.txt to point to correct sitemap location
+  console.log('🤖 Generating dynamic robots.txt...');
+  const robotsTxt = `# AI Creator Hub - Robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /create
+Disallow: /edit/
+Disallow: /login
+
+Sitemap: ${frontendUrl}/sitemap.xml
+`;
+  fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
+  console.log('✅ Generated dynamic robots.txt successfully.');
+
   console.log('🎉 Pre-rendering pipeline completed successfully!');
 }
 
