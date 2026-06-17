@@ -92,7 +92,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
         if (data?.categories && data.categories.length > 0) {
           const categoryId = (data.categories[0] as any).id;
           if (categoryId) {
-            const related = await api.getRelatedPrompts(categoryId, id);
+            const related = await api.getRelatedPrompts(categoryId, data.id);
             setRelatedPrompts(related);
           }
         }
