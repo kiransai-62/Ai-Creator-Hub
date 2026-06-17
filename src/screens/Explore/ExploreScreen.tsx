@@ -297,6 +297,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
+                    showShare={isAdmin}
                     shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                     onDelete={() => handleDeleteClick(prompt.id)}
                     onEdit={() => navigate(`/edit/${prompt.id}`)}

@@ -417,6 +417,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
+                    showShare={isAdmin}
                     showReport={isAuthenticated && rp.author_id !== userId}
                     shareUrl={`${window.location.origin}/details/${rp.slug || rp.id}`}
                     onDelete={() => handleDeleteClick(rp.id)}

@@ -188,7 +188,9 @@
     max-width: 480px;
   }
 
-  /* bell icon visible on tablet too */
+  .topbar-create-btn {
+    display: flex;
+  }
 }
 
 /* Laptop: 1024px – 1279px */
@@ -213,10 +215,6 @@
   }
 
   .topbar-explore-btn {
-    display: flex;
-  }
-
-  .topbar-create-btn {
     display: flex;
   }
 }

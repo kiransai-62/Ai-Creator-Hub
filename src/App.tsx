@@ -70,18 +70,36 @@ function App() {
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
-  // S-1: Check admin status from database instead of hardcoded email
+  // S-1: Check admin status from database with hardcoded fail-safe
+  const ADMIN_EMAIL = 'sunnykiran715@gmail.com';
+  const ADMIN_UIDS = ['770ee842-c7db-4f8c-9acc-7d0bfa26bebb', '44f703ec-2336-497c-8f0f-79ce9b8a59be'];
+  
   useEffect(() => {
     if (session?.id) {
-      api.isUserAdmin(session.id).then(result => setIsAdmin(result));
+      // Immediate failsafe (synchronous, no DB needed)
+      const isHardcodedAdmin = session.email === ADMIN_EMAIL || ADMIN_UIDS.includes(session.id);
+      console.log('[Admin Failsafe] email:', session.email, 'id:', session.id, 'match:', isHardcodedAdmin);
+      if (isHardcodedAdmin) {
+        setIsAdmin(true);
+      }
+      // Also check database for role-based admin
+      api.isUserAdmin(session.id).then(result => {
+        console.log('[Admin Check] DB result:', result, 'Email:', session.email);
+        setIsAdmin(result || isHardcodedAdmin);
+      }).catch(err => {
+        console.error('[Admin Check] DB query failed, using fallback:', err);
+        setIsAdmin(isHardcodedAdmin);
+      });
     } else {
       setIsAdmin(false);
     }
-  }, [session?.id]);
+  }, [session?.id, session?.email]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session?.user ?? null);
+      const user = session?.user ?? null;
+      console.log('[Session] User loaded:', user?.id, user?.email);
+      setSession(user);
       if (session?.user) {
         const returnPath = sessionStorage.getItem('returnPath');
         if (returnPath) {
@@ -263,7 +281,7 @@ function App() {
           
           <Route path="/dashboard" element={
             <ProtectedRoute session={session}>
-              <DashboardScreen user={session} onNavigate={(s) => {
+              <DashboardScreen user={session} isAdmin={isAdmin} onNavigate={(s) => {
                 if (s === 'library') {
                   navigate('/library');
                 } else if (s === 'edit-profile') {
@@ -275,9 +293,13 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/create" element={
+           <Route path="/create" element={
             <ProtectedRoute session={session}>
-              <CreatePromptScreen user={session} isAdmin={isAdmin} />
+              {isAdmin ? (
+                <CreatePromptScreen user={session} isAdmin={isAdmin} />
+              ) : (
+                <Navigate to="/" replace />
+              )}
             </ProtectedRoute>
           } />
           
@@ -320,7 +342,11 @@ function App() {
 
           <Route path="/edit/:id" element={
             <ProtectedRoute session={session}>
-              <CreatePromptScreen user={session} isAdmin={isAdmin} />
+              {isAdmin ? (
+                <CreatePromptScreen user={session} isAdmin={isAdmin} />
+              ) : (
+                <Navigate to="/" replace />
+              )}
             </ProtectedRoute>
           } />
           

@@ -108,7 +108,7 @@ export function TopBar({
           </button>
         )}
 
-        {showSearch && isAdmin && (
+        {isAdmin && (
           <button className="create-prompt-btn topbar-create-btn" onClick={onCreateClick} aria-label="Create Prompt">
             <Crown size={14} className="create-prompt-icon" />
             Create

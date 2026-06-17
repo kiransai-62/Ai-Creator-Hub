@@ -241,36 +241,43 @@ export const api = {
 
   // Fetch copied prompts
   async getCopiedPrompts(userId: string): Promise<PromptWithAuthor[]> {
-    const { data, error } = await supabase
+    // Step 1: Get prompt IDs from user_copies (no FK to prompts)
+    const { data: copies, error: copiesError } = await supabase
       .from('user_copies')
-      .select(`
-        prompts(
-          *,
-          author:profiles!prompts_author_id_fkey(full_name, avatar_url, username),
-          prompt_categories(
-            categories(name, slug)
-          )
-        )
-      `)
+      .select('prompt_id')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
+
+    if (copiesError || !copies || copies.length === 0) {
+      if (copiesError) console.error('Error fetching user_copies:', copiesError);
+      return [];
+    }
+
+    const promptIds = copies.map((c: any) => c.prompt_id).filter(Boolean);
+    if (promptIds.length === 0) return [];
+
+    // Step 2: Fetch full prompt data for those IDs
+    const { data, error } = await supabase
+      .from('prompts')
+      .select(`
+        *,
+        author:profiles!prompts_author_id_fkey(full_name, avatar_url, username),
+        prompt_categories(
+          categories(name, slug)
+        )
+      `)
+      .in('id', promptIds);
 
     if (error) {
       console.error('Error fetching copied prompts:', error);
       return [];
     }
 
-    return (data as any[])
-      .map(d => {
-        const p = d.prompts;
-        if (!p) return null;
-        return {
-          ...p,
-          categories: p.prompt_categories ? p.prompt_categories.map((pc: any) => pc.categories) : [],
-          prompt_categories: undefined
-        };
-      })
-      .filter(Boolean) as PromptWithAuthor[];
+    return (data as any[]).map(p => ({
+      ...p,
+      categories: p.prompt_categories ? p.prompt_categories.map((pc: any) => pc.categories) : [],
+      prompt_categories: undefined
+    })) as PromptWithAuthor[];
   },
 
   // Fetch a single prompt by ID or slug
@@ -620,15 +627,21 @@ export const api = {
 
   // Check if user is admin via database column
   async isUserAdmin(userId: string): Promise<boolean> {
-    if (!isValidUUID(userId)) return false;
+    if (!isValidUUID(userId)) {
+      console.log('[isUserAdmin] Invalid UUID:', userId);
+      return false;
+    }
     const { data, error } = await supabase
       .from('profiles')
-      .select('is_admin')
+      .select('is_admin, role')
       .eq('id', userId)
       .maybeSingle();
 
+    console.log('[isUserAdmin] Query result:', { data, error, userId });
     if (error || !data) return false;
-    return (data as any).is_admin === true;
+    const result = (data as any).is_admin === true || (data as any).role === 'admin';
+    console.log('[isUserAdmin] Admin check result:', result);
+    return result;
   },
 
   // Ban/suspend user

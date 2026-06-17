@@ -9,12 +9,12 @@ import './DashboardScreen.css';
 
 interface DashboardScreenProps {
   user: User | null;
+  isAdmin?: boolean;
   onNavigate: (screen: string) => void;
 }
 
-export function DashboardScreen({ user, onNavigate }: DashboardScreenProps) {
+export function DashboardScreen({ user, isAdmin = user?.email === 'sunnykiran715@gmail.com', onNavigate }: DashboardScreenProps) {
   const navigate = useNavigate();
-  const isAdmin = user?.email === 'sunnykiran715@gmail.com';
   const [activeTab, setActiveTab] = useState<'published' | 'saved' | 'copied'>(isAdmin ? 'published' : 'saved');
   const [prompts, setPrompts] = useState<PromptWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +156,7 @@ export function DashboardScreen({ user, onNavigate }: DashboardScreenProps) {
                     {activeTab === 'published' ? (prompt.status === 'published' ? 'Published' : 'Draft') : (prompt.author?.username ? `@${prompt.author.username}` : (prompt.author?.full_name || 'Anonymous'))}
                   </p>
                 </div>
-                {activeTab === 'published' ? (
+                {isAdmin && activeTab === 'published' ? (
                   <div className="prompt-item-actions">
                     <button 
                       onClick={() => navigate(`/edit/${prompt.id}`)}

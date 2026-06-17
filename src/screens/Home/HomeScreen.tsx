@@ -184,6 +184,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
+                  showShare={isAdmin}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
@@ -232,6 +233,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
+                  showShare={isAdmin}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
@@ -280,6 +282,7 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
+                  showShare={isAdmin}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}

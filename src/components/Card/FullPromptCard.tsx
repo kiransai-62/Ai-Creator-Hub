@@ -20,6 +20,7 @@ interface FullPromptCardProps {
   showDelete?: boolean;
   showEdit?: boolean;
   showReport?: boolean;
+  showShare?: boolean;
   shareUrl?: string;
   onDelete?: () => void;
   onEdit?: () => void;
@@ -40,6 +41,7 @@ export function FullPromptCard({
   showDelete,
   showEdit,
   showReport,
+  showShare = false,
   shareUrl,
   onDelete,
   onEdit,
@@ -82,61 +84,63 @@ export function FullPromptCard({
               <Flag size={16} />
             </button>
           )}
-          <div style={{ position: 'relative' }}>
-            <button 
-              className="fpc-action-btn" 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setShowShareMenu(!showShareMenu);
-              }}
-              title="Share"
-              aria-label="Share prompt"
-            >
-              <Share2 size={16} />
-            </button>
-            {showShareMenu && shareUrl && (
-              <div className="pc-share-menu" onClick={(e) => e.stopPropagation()}>
-                <button 
-                  className="pc-share-menu-item"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(shareUrl);
-                    setShareCopied(true);
-                    setTimeout(() => {
-                      setShareCopied(false);
-                      setShowShareMenu(false);
-                    }, 2000);
-                  }}
-                  aria-label="Copy prompt link"
-                >
-                  {shareCopied ? <Check size={14} /> : <Link2 size={14} />}
-                  {shareCopied ? 'Copied!' : 'Copy link'}
-                </button>
-                {navigator.share && (
+          {showShare && (
+            <div style={{ position: 'relative' }}>
+              <button 
+                className="fpc-action-btn" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setShowShareMenu(!showShareMenu);
+                }}
+                title="Share"
+                aria-label="Share prompt"
+              >
+                <Share2 size={16} />
+              </button>
+              {showShareMenu && shareUrl && (
+                <div className="pc-share-menu" onClick={(e) => e.stopPropagation()}>
                   <button 
                     className="pc-share-menu-item"
-                    onClick={async (e) => {
+                    onClick={(e) => {
                       e.stopPropagation();
-                      setShowShareMenu(false);
-                      try {
-                        await navigator.share({
-                          title: title,
-                          text: `Check out this AI prompt on AI Creator Hub: ${title}`,
-                          url: shareUrl
-                        });
-                      } catch (err) {
-                        console.error('Share failed:', err);
-                      }
+                      navigator.clipboard.writeText(shareUrl);
+                      setShareCopied(true);
+                      setTimeout(() => {
+                        setShareCopied(false);
+                        setShowShareMenu(false);
+                      }, 2000);
                     }}
-                    aria-label="System share"
+                    aria-label="Copy prompt link"
                   >
-                    <Share2 size={14} />
-                    System Share
+                    {shareCopied ? <Check size={14} /> : <Link2 size={14} />}
+                    {shareCopied ? 'Copied!' : 'Copy link'}
                   </button>
-                )}
-              </div>
-            )}
-          </div>
+                  {navigator.share && (
+                    <button 
+                      className="pc-share-menu-item"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setShowShareMenu(false);
+                        try {
+                          await navigator.share({
+                            title: title,
+                            text: `Check out this AI prompt on AI Creator Hub: ${title}`,
+                            url: shareUrl
+                          });
+                        } catch (err) {
+                          console.error('Share failed:', err);
+                        }
+                      }}
+                      aria-label="System share"
+                    >
+                      <Share2 size={14} />
+                      System Share
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           {showEdit && (
             <button 
               className="fpc-action-btn" 
