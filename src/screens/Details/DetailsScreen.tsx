@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Eye, Copy, Lock, Sparkles, Check, Heart, Flag } from 'lucide-react';
+import { Eye, Copy, Lock, Sparkles, Check, Heart, Flag, Home, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '../../components/Button/Button';
@@ -186,8 +186,30 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
 
   if (!prompt) {
     return (
-      <div className="details-screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--text-muted)' }}>Prompt not found.</p>
+      <div className="details-screen-not-found-wrapper">
+        <Helmet>
+          <title>Prompt Not Found | AI Creator Hub</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <div className="details-not-found-card glass-panel">
+          <div className="not-found-icon-wrapper">
+            <Flag size={32} className="not-found-icon" />
+          </div>
+          <h1 className="details-not-found-title">Prompt Not Found</h1>
+          <p className="details-not-found-desc">
+            The prompt you are looking for could not be found. It may have been deleted by the author, moderated, or the URL might be incorrect.
+          </p>
+          <div className="details-not-found-actions">
+            <Button variant="primary" onClick={() => navigate('/')}>
+              <Home size={16} />
+              Go Home
+            </Button>
+            <Button variant="dimmed" onClick={() => navigate('/explore')}>
+              <Compass size={16} />
+              Explore Prompts
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

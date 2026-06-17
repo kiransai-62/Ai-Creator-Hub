@@ -85,24 +85,9 @@ export function FullPromptCard({
           <div style={{ position: 'relative' }}>
             <button 
               className="fpc-action-btn" 
-              onClick={async (e) => { 
+              onClick={(e) => { 
                 e.stopPropagation(); 
-                if (!shareUrl) return;
-                if (navigator.share) {
-                  try {
-                    await navigator.share({
-                      title: title,
-                      text: `Check out this AI prompt on AI Creator Hub: ${title}`,
-                      url: shareUrl
-                    });
-                  } catch (err) {
-                    if (err instanceof Error && err.name !== 'AbortError') {
-                      setShowShareMenu(!showShareMenu);
-                    }
-                  }
-                } else {
-                  setShowShareMenu(!showShareMenu); 
-                }
+                setShowShareMenu(!showShareMenu);
               }}
               title="Share"
               aria-label="Share prompt"
@@ -127,6 +112,28 @@ export function FullPromptCard({
                   {shareCopied ? <Check size={14} /> : <Link2 size={14} />}
                   {shareCopied ? 'Copied!' : 'Copy link'}
                 </button>
+                {navigator.share && (
+                  <button 
+                    className="pc-share-menu-item"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      setShowShareMenu(false);
+                      try {
+                        await navigator.share({
+                          title: title,
+                          text: `Check out this AI prompt on AI Creator Hub: ${title}`,
+                          url: shareUrl
+                        });
+                      } catch (err) {
+                        console.error('Share failed:', err);
+                      }
+                    }}
+                    aria-label="System share"
+                  >
+                    <Share2 size={14} />
+                    System Share
+                  </button>
+                )}
               </div>
             )}
           </div>
