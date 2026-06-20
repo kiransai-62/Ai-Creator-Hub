@@ -78,21 +78,38 @@
   flex-direction: column;
   gap: 8px;
   z-index: 2;
+}
+
+.pc-top-right-actions.has-badge {
+  top: 44px; /* 8px + 28px (badge height) + 8px gap = 44px */
+}
+
+/* Admin action buttons show on hover */
+.pc-action-btn.admin-btn {
   opacity: 0;
   transform: translateX(10px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
-.prompt-card:hover .pc-top-right-actions {
+.prompt-card:hover .pc-action-btn.admin-btn {
   opacity: 1;
   transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* Share button is always visible */
+.pc-action-btn.share-btn {
+  opacity: 1;
+  transform: none;
 }
 
 /* Always show on mobile */
 @media (max-width: 767px) {
-  .pc-top-right-actions {
+  .pc-action-btn.admin-btn {
     opacity: 1;
     transform: translateX(0);
+    pointer-events: auto;
   }
 }
 

@@ -720,3 +720,190 @@
 .btn-danger:hover {
   box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
+
+/* ── 10. Developer Settings (API Keys) ────────────────────────────────────── */
+
+.api-keys-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.api-key-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.banner-title {
+  color: #10b981;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.banner-desc {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.api-key-box {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.api-key-text {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  color: var(--text-primary);
+  word-break: break-all;
+  user-select: all;
+}
+
+.btn-icon-only {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-only:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-icon-only.copied {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.api-keys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.api-key-card {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.api-key-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.api-key-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.api-key-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.api-key-prefix-badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+.api-key-meta-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.api-key-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-revoke {
+  color: var(--text-muted);
+}
+
+.btn-revoke:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.generate-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.generate-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.generate-input-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.generate-input-row .input-field {
+  flex: 1;
+}
+
+.empty-keys-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 13px;
+  line-height: 1.5;
+}
+

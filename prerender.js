@@ -291,6 +291,78 @@ async function start() {
         "name": "Copyright Policy",
         "url": `${frontendUrl}/settings/copyright-policy`
       }
+    },
+    {
+      route: 'about',
+      title: 'About Us | Ai Prompt Hub',
+      description: 'Learn about Ai Prompt Hub, our mission to democratize prompt engineering, and the creative team behind the platform.',
+      imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "About Us",
+        "url": `${frontendUrl}/about`
+      }
+    },
+    {
+      route: 'contact',
+      title: 'Contact Us | Ai Prompt Hub',
+      description: 'Get in touch with the Ai Prompt Hub support team. Send your inquiries, feedback, or support requests.',
+      imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Contact Us",
+        "url": `${frontendUrl}/contact`
+      }
+    },
+    {
+      route: 'blog',
+      title: 'AI Tutorials & Prompt Engineering Guides | Ai Prompt Hub',
+      description: 'Discover tutorials and guides for Midjourney, Stable Diffusion, DALL-E, and prompt engineering. Learn how to generate beautiful AI art.',
+      imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "AI Tutorials & Guides",
+        "url": `${frontendUrl}/blog`
+      }
+    },
+    {
+      route: 'blog/how-to-create-cinematic-ai-posters',
+      title: 'How to Create Cinematic AI Posters | Ai Prompt Hub',
+      description: 'Learn the secrets of lighting, composition, camera parameters, and prompt syntax to generate studio-quality cinematic movie posters using Midjourney and Stable Diffusion.',
+      imageUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "How to Create Cinematic AI Posters",
+        "url": `${frontendUrl}/blog/how-to-create-cinematic-ai-posters`
+      }
+    },
+    {
+      route: 'blog/best-midjourney-prompts-for-travel-posters',
+      title: 'Best Midjourney Prompts for Travel Posters | Ai Prompt Hub',
+      description: 'Uncover the exact styling prompts, color palettes, and artistic styles to generate beautiful vintage and minimalist travel posters.',
+      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Best Midjourney Prompts for Travel Posters",
+        "url": `${frontendUrl}/blog/best-midjourney-prompts-for-travel-posters`
+      }
+    },
+    {
+      route: 'blog/how-double-exposure-prompts-work',
+      title: 'How Double Exposure Prompts Work | Ai Prompt Hub',
+      description: 'Master the art of prompt engineering to create double exposure graphics that overlay human profiles with landscapes and textures.',
+      imageUrl: 'https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?auto=format&fit=crop&w=800&q=80',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "How Double Exposure Prompts Work",
+        "url": `${frontendUrl}/blog/how-double-exposure-prompts-work`
+      }
     }
   ];
 
@@ -316,7 +388,22 @@ async function start() {
   sitemapXml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
   
   const nowStr = new Date().toISOString().split('T')[0];
-  const staticUrls = ['', '/explore', '/login', '/dashboard', '/settings/help-center', '/settings/privacy-policy', '/settings/terms-of-service', '/settings/copyright-policy'];
+  const staticUrls = [
+    '', 
+    '/explore', 
+    '/login', 
+    '/dashboard', 
+    '/settings/help-center', 
+    '/settings/privacy-policy', 
+    '/settings/terms-of-service', 
+    '/settings/copyright-policy',
+    '/about',
+    '/contact',
+    '/blog',
+    '/blog/how-to-create-cinematic-ai-posters',
+    '/blog/best-midjourney-prompts-for-travel-posters',
+    '/blog/how-double-exposure-prompts-work'
+  ];
   
   staticUrls.forEach(url => {
     sitemapXml += `  <url>\n`;

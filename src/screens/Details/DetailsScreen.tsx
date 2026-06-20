@@ -70,13 +70,14 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
       if (!id) return;
       setLoading(true);
       try {
-        // Increment view count first (fire and forget)
-        api.incrementViewCount(id).catch(console.error);
-        
         // Fetch details
         const data = await api.getPromptDetails(id);
         if (data) {
           setPrompt(data);
+          
+          // Increment view count using the database UUID
+          api.incrementViewCount(data.id).catch(console.error);
+
           // If the user accessed the page via UUID, redirect to slug-based URL for SEO and UX consistency
           if (data.slug && id === data.id) {
             navigate(`/details/${data.slug}`, { replace: true });
@@ -105,13 +106,6 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
     loadData();
   }, [id]);
 
-  useEffect(() => {
-    if (prompt && isAuthenticated && sessionStorage.getItem('pendingCopy') === prompt.id) {
-      sessionStorage.removeItem('pendingCopy');
-      handleCopyClick();
-    }
-  }, [prompt, isAuthenticated]);
-
   const handleCopyClick = async () => {
     if (!prompt) return;
     try {
@@ -132,6 +126,13 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
       console.error('Failed to copy: ', err);
     }
   };
+
+  useEffect(() => {
+    if (prompt && isAuthenticated && sessionStorage.getItem('pendingCopy') === prompt.id) {
+      sessionStorage.removeItem('pendingCopy');
+      handleCopyClick();
+    }
+  }, [prompt, isAuthenticated]);
 
   const handleReportClick = async () => {
     if (!isAuthenticated || !userId) {
@@ -271,33 +272,33 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
         initial="hidden"
         animate="visible"
       >
-        <motion.h1 variants={itemVariants} className="title">{prompt.title}</motion.h1>
-        {prompt.author && (
-          <motion.p variants={itemVariants} style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>
-            by {prompt.author.username ? `@${prompt.author.username}` : (prompt.author.full_name || 'Anonymous')}
-          </motion.p>
-        )}
-        
-        <motion.div variants={itemVariants} className="stats-row">
-          <div className="stat">
-            <Eye size={16} className="text-muted" />
-            <span>{(prompt.views_count || 0) + 1} Views</span> {/* +1 to account for current view before reload */}
-          </div>
-          <div className="stat">
-            <Copy size={16} className="text-muted" />
-            <span>{prompt.copies_count || 0} Copies</span>
-          </div>
-        </motion.div>
-        
-        <motion.div variants={itemVariants} className="tags-row">
-          {prompt.categories?.map((cat, i) => (
-            <Tag key={i} label={cat.name} variant={i % 2 === 0 ? 'default' : 'outline-purple'} />
-          ))}
-          {prompt.is_premium && <Tag label="Pro" variant="solid-cyan" />}
-        </motion.div>
-        
-        {isAuthenticated || !prompt.is_premium ? (
+        {isAuthenticated ? (
           <>
+            <motion.h1 variants={itemVariants} className="title">{prompt.title}</motion.h1>
+            {prompt.author && (
+              <motion.p variants={itemVariants} style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '14px' }}>
+                by {prompt.author.username ? `@${prompt.author.username}` : (prompt.author.full_name || 'Anonymous')}
+              </motion.p>
+            )}
+            
+            <motion.div variants={itemVariants} className="stats-row">
+              <div className="stat">
+                <Eye size={16} className="text-muted" />
+                <span>{(prompt.views_count || 0) + 1} Views</span> {/* +1 to account for current view before reload */}
+              </div>
+              <div className="stat">
+                <Copy size={16} className="text-muted" />
+                <span>{prompt.copies_count || 0} Copies</span>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="tags-row">
+              {prompt.categories?.map((cat, i) => (
+                <Tag key={i} label={cat.name} variant={i % 2 === 0 ? 'default' : 'outline-purple'} />
+              ))}
+              {prompt.is_premium && <Tag label="Pro" variant="solid-cyan" />}
+            </motion.div>
+
             <motion.div variants={itemVariants} className="prompt-text-container">
               <p className="prompt-text">
                 "{prompt.prompt_text}"
@@ -366,7 +367,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
               <Lock size={24} className="lock-icon" />
             </div>
             <h2 className="auth-title">Sign in to view prompt</h2>
-            <p className="auth-desc">This is a premium prompt. Sign in to access thousands of curated AI prompts.</p>
+            <p className="auth-desc">Sign in to access thousands of curated AI prompts.</p>
             
             <Button variant="google" fullWidth className="google-btn" onClick={() => {
               sessionStorage.setItem('pendingCopy', prompt.id);
@@ -405,6 +406,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                   variants={itemVariants}
                 >
                   <FullPromptCard 
+                    id={rp.id}
                     image={rp.image_url || ''}
                     title={rp.title}
                     author={rp.author?.username ? `@${rp.author.username}` : (rp.author?.full_name || 'Anonymous')}
@@ -417,7 +419,7 @@ export function DetailsScreen({ onCopy, isAuthenticated, onLogin, userId, isAdmi
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
-                    showShare={isAdmin}
+                    showShare={true}
                     showReport={isAuthenticated && rp.author_id !== userId}
                     shareUrl={`${window.location.origin}/details/${rp.slug || rp.id}`}
                     onDelete={() => handleDeleteClick(rp.id)}

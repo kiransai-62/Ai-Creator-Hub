@@ -10,6 +10,8 @@ import './App.css';
 import { SearchAutocomplete } from './components/SearchAutocomplete/SearchAutocomplete';
 import { TopBar } from './components/TopBar/TopBar';
 import { BottomNav } from './components/BottomNav/BottomNav';
+import { CookieConsent } from './components/CookieConsent/CookieConsent';
+import { Footer } from './components/Footer/Footer';
 
 // P-2: Code splitting — lazy load all route-level components
 const HomeScreen = lazy(() => import('./screens/Home/HomeScreen').then(m => ({ default: m.HomeScreen })));
@@ -22,12 +24,17 @@ const DashboardScreen = lazy(() => import('./screens/Dashboard/DashboardScreen')
 const CreatePromptScreen = lazy(() => import('./screens/Create/CreatePromptScreen').then(m => ({ default: m.CreatePromptScreen })));
 const AdminScreen = lazy(() => import('./screens/Admin/AdminScreen').then(m => ({ default: m.AdminScreen })));
 const NotFoundScreen = lazy(() => import('./screens/NotFound/NotFoundScreen').then(m => ({ default: m.NotFoundScreen })));
+const AboutScreen = lazy(() => import('./screens/About/AboutScreen').then(m => ({ default: m.AboutScreen })));
+const ContactScreen = lazy(() => import('./screens/Contact/ContactScreen').then(m => ({ default: m.ContactScreen })));
+const BlogScreen = lazy(() => import('./screens/Blog/BlogScreen').then(m => ({ default: m.BlogScreen })));
+const BlogPostScreen = lazy(() => import('./screens/Blog/BlogPostScreen').then(m => ({ default: m.BlogPostScreen })));
 
 // Lazy load settings sub-screens
 const LazyEditProfileScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.EditProfileScreen })));
 const LazySubscriptionScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.SubscriptionScreen })));
 const LazyBillingDetailsScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.BillingDetailsScreen })));
 const LazyThemeSettingsScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.ThemeSettingsScreen })));
+const LazyDeveloperSettingsScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.DeveloperSettingsScreen })));
 const LazyHelpCenterScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.HelpCenterScreen })));
 const LazyPrivacyPolicyScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.PrivacyPolicyScreen })));
 const LazyTermsOfServiceScreen = lazy(() => import('./screens/Settings/SettingsSubScreens').then(m => ({ default: m.TermsOfServiceScreen })));
@@ -155,6 +162,7 @@ function App() {
     if (path.includes('/subscription')) return 'Subscription';
     if (path.includes('/billing')) return 'Billing Details';
     if (path.includes('/theme')) return 'Theme Settings';
+    if (path.includes('/developer')) return 'Developer Settings';
     if (path.includes('/help-center')) return 'Help Center';
     if (path.includes('/privacy-policy')) return 'Privacy Policy';
     if (path.includes('/terms-of-service')) return 'Terms of Service';
@@ -353,6 +361,12 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/settings/developer" element={
+            <ProtectedRoute session={session}>
+              <LazyDeveloperSettingsScreen />
+            </ProtectedRoute>
+          } />
+
           <Route path="/edit/:id" element={
             <ProtectedRoute session={session}>
               {isAdmin ? (
@@ -369,10 +383,18 @@ function App() {
           <Route path="/settings/terms-of-service" element={<LazyTermsOfServiceScreen />} />
           <Route path="/settings/copyright-policy" element={<LazyCopyrightPolicyScreen />} />
           
+          {/* Public Information, Contact, and Blog Pages */}
+          <Route path="/about" element={<AboutScreen />} />
+          <Route path="/contact" element={<ContactScreen />} />
+          <Route path="/blog" element={<BlogScreen />} />
+          <Route path="/blog/:slug" element={<BlogPostScreen />} />
+          
           {/* Fallback to 404 */}
           <Route path="*" element={<NotFoundScreen />} />
         </Routes>
       </Suspense>
+      
+      <Footer />
       
       {getCurrentTab() !== '' && (
         <BottomNav 
@@ -398,6 +420,8 @@ function App() {
           />
         </Suspense>
       )}
+
+      <CookieConsent />
     </div>
   );
 }

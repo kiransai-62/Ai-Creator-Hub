@@ -46,21 +46,37 @@
   flex-direction: column;
   gap: 8px;
   z-index: 2;
+}
+
+/* Admin/report buttons are hidden until hover */
+.fpc-action-btn.admin-btn,
+.fpc-action-btn.report-btn {
   opacity: 0;
   transform: translateX(10px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
-.full-prompt-card:hover .fpc-top-right-actions {
+.full-prompt-card:hover .fpc-action-btn.admin-btn,
+.full-prompt-card:hover .fpc-action-btn.report-btn {
   opacity: 1;
   transform: translateX(0);
+  pointer-events: auto;
 }
 
-/* Make actions always visible on mobile */
+/* Share button is always visible */
+.fpc-action-btn.share-btn {
+  opacity: 1;
+  transform: none;
+}
+
+/* Always show on mobile */
 @media (max-width: 767px) {
-  .fpc-top-right-actions {
+  .fpc-action-btn.admin-btn,
+  .fpc-action-btn.report-btn {
     opacity: 1;
     transform: translateX(0);
+    pointer-events: auto;
   }
 }
 

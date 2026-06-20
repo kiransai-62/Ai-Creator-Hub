@@ -19,6 +19,7 @@ export interface PromptCardProps {
   shareUrl?: string;
   onDelete?: () => void;
   onEdit?: () => void;
+  isAuthenticated?: boolean;
 }
 
 export function PromptCard({
@@ -33,10 +34,11 @@ export function PromptCard({
   className = '',
   showDelete,
   showEdit,
-  showShare = false,
+  showShare = true,
   shareUrl,
   onDelete,
-  onEdit
+  onEdit,
+  isAuthenticated = true
 }: PromptCardProps) {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -59,96 +61,102 @@ export function PromptCard({
             No Image
           </div>
         )}
-        <div className={`stat-badge ${statPosition} ${statIcon === 'copy' ? 'cyan-bg' : ''}`}>
-          {renderIcon()}
-          <span>{statValue}</span>
-        </div>
+        {isAuthenticated && (
+          <div className={`stat-badge ${statPosition} ${statIcon === 'copy' ? 'cyan-bg' : ''}`}>
+            {renderIcon()}
+            <span>{statValue}</span>
+          </div>
+        )}
 
-        <div className="pc-top-right-actions">
-          {showShare && (
-            <div style={{ position: 'relative' }}>
-              <button 
-                className="pc-action-btn" 
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  setShowShareMenu(!showShareMenu);
-                }}
-                title="Share"
-                aria-label="Share prompt"
-              >
-                <Share2 size={14} className="pc-action-icon" />
-              </button>
-              {showShareMenu && shareUrl && (
-                <div className="pc-share-menu" onClick={(e) => e.stopPropagation()}>
-                  <button 
-                    className="pc-share-menu-item"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigator.clipboard.writeText(shareUrl);
-                      setCopied(true);
-                      setTimeout(() => {
-                        setCopied(false);
-                        setShowShareMenu(false);
-                      }, 2000);
-                    }}
-                    aria-label="Copy prompt link"
-                  >
-                    {copied ? <Check size={14} /> : <Link2 size={14} />}
-                    {copied ? 'Copied!' : 'Copy link'}
-                  </button>
-                  {navigator.share && (
+        {(isAuthenticated || showShare) && (
+          <div className={`pc-top-right-actions ${isAuthenticated && statPosition === 'top-right' ? 'has-badge' : ''}`}>
+            {showShare && (
+              <div style={{ position: 'relative' }}>
+                <button 
+                  className="pc-action-btn share-btn" 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setShowShareMenu(!showShareMenu);
+                  }}
+                  title="Share"
+                  aria-label="Share prompt"
+                >
+                  <Share2 size={14} className="pc-action-icon" />
+                </button>
+                {showShareMenu && shareUrl && (
+                  <div className="pc-share-menu" onClick={(e) => e.stopPropagation()}>
                     <button 
                       className="pc-share-menu-item"
-                      onClick={async (e) => {
+                      onClick={(e) => {
                         e.stopPropagation();
-                        setShowShareMenu(false);
-                        try {
-                          await navigator.share({
-                            title: title,
-                            text: `Check out this AI prompt on AI Creator Hub: ${title}`,
-                            url: shareUrl
-                          });
-                        } catch (err) {
-                          console.error('Share failed:', err);
-                        }
+                        navigator.clipboard.writeText(shareUrl);
+                        setCopied(true);
+                        setTimeout(() => {
+                          setCopied(false);
+                          setShowShareMenu(false);
+                        }, 2000);
                       }}
-                      aria-label="System share"
+                      aria-label="Copy prompt link"
                     >
-                      <Share2 size={14} />
-                      System Share
+                      {copied ? <Check size={14} /> : <Link2 size={14} />}
+                      {copied ? 'Copied!' : 'Copy link'}
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          {showEdit && (
-            <button 
-              className="pc-action-btn" 
-              onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
-              title="Edit"
-              aria-label="Edit prompt"
-            >
-              <Edit2 size={14} className="pc-action-icon" />
-            </button>
-          )}
-          {showDelete && (
-            <button 
-              className="pc-action-btn" 
-              onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
-              title="Delete"
-              aria-label="Delete prompt"
-            >
-              <Trash2 size={14} className="pc-action-icon" />
-            </button>
-          )}
-        </div>
+                    {navigator.share && (
+                      <button 
+                        className="pc-share-menu-item"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setShowShareMenu(false);
+                          try {
+                            await navigator.share({
+                              title: title,
+                              text: `Check out this AI prompt on AI Creator Hub: ${title}`,
+                              url: shareUrl
+                            });
+                          } catch (err) {
+                            console.error('Share failed:', err);
+                          }
+                        }}
+                        aria-label="System share"
+                      >
+                        <Share2 size={14} />
+                        System Share
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            {isAuthenticated && showEdit && (
+              <button 
+                className="pc-action-btn admin-btn" 
+                onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
+                title="Edit"
+                aria-label="Edit prompt"
+              >
+                <Edit2 size={14} className="pc-action-icon" />
+              </button>
+            )}
+            {isAuthenticated && showDelete && (
+              <button 
+                className="pc-action-btn admin-btn" 
+                onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
+                title="Delete"
+                aria-label="Delete prompt"
+              >
+                <Trash2 size={14} className="pc-action-icon" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
       
-      <div className="card-content">
-        <h3 className="card-title">{title}</h3>
-        {author && <p className="card-author">@{author}</p>}
-      </div>
+      {isAuthenticated && (
+        <div className="card-content">
+          <h3 className="card-title">{title}</h3>
+          {author && <p className="card-author">@{author}</p>}
+        </div>
+      )}
     </div>
   );
 }

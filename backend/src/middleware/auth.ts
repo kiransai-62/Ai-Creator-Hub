@@ -3,6 +3,7 @@ import { supabase } from '../db/supabase';
 
 // Extend Express Request object to include the authenticated user
 declare global {
+  /* eslint-disable-next-line @typescript-eslint/no-namespace */
   namespace Express {
     interface Request {
       user?: {
@@ -47,7 +48,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     };
 
     next();
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Internal server error during authentication' });
   }
 };

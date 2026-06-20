@@ -14,6 +14,8 @@ const PORT = process.env.PORT || 5000;
 
 import userRoutes from './routes/userRoutes';
 import promptRoutes from './routes/promptRoutes';
+import apiKeyRoutes from './routes/apiKeyRoutes';
+import developerRoutes from './routes/developerRoutes';
 import { supabase } from './db/supabase';
 
 // S-7: Restrict CORS to frontend domain instead of allowing all origins
@@ -38,6 +40,8 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/prompts', promptRoutes);
+app.use('/api/api-keys', apiKeyRoutes);
+app.use('/api/v1', developerRoutes);
 
 // Dynamic sitemap.xml endpoint for SEO
 app.get('/sitemap.xml', async (req, res) => {

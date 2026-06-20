@@ -29,7 +29,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
 };
 
-export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenProps) {
+export function HomeScreen({ onCardClick, onExploreClick, userId, isAdmin }: HomeScreenProps) {
   const navigate = useNavigate();
   const [trending, setTrending] = useState<PromptWithAuthor[]>([]);
   const [mostCopied, setMostCopied] = useState<PromptWithAuthor[]>([]);
@@ -185,10 +185,11 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  showShare={isAdmin}
+                  showShare={true}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
+                  isAuthenticated={!!userId}
                 />
               </motion.div>
             ))
@@ -235,10 +236,11 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  showShare={isAdmin}
+                  showShare={true}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
+                  isAuthenticated={!!userId}
                 />
               </motion.div>
             ))
@@ -285,10 +287,11 @@ export function HomeScreen({ onCardClick, onExploreClick, isAdmin }: HomeScreenP
                   onClick={() => onCardClick(prompt.slug || prompt.id)}
                   showDelete={isAdmin}
                   showEdit={isAdmin}
-                  showShare={isAdmin}
+                  showShare={true}
                   shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                   onDelete={() => handleDeleteClick(prompt.id)}
                   onEdit={() => navigate(`/edit/${prompt.id}`)}
+                  isAuthenticated={!!userId}
                 />
               </motion.div>
             ))

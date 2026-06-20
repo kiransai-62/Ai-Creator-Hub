@@ -1,0 +1,109 @@
+/* About Screen Styling */
+
+.about-screen {
+  padding: 40px 24px 80px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 80vh;
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+.about-hero {
+  text-align: center;
+  margin-bottom: 56px;
+  margin-top: 32px;
+}
+
+.about-title {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text-heading);
+  margin: 16px 0;
+  background: linear-gradient(135deg, #FFF 0%, #A855F7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.about-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Grid Cards */
+.about-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.about-card {
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.about-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.about-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Icon Wrappers */
+.about-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+}
+
+.cyan-glow {
+  border-color: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.2);
+}
+
+.purple-glow {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 15px -3px rgba(139, 92, 246, 0.2);
+}
+
+.green-glow {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.2);
+}
+
+.gold-glow {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.2);
+}
+
+.text-cyan { color: #06B6D4; }
+.text-purple { color: #8B5CF6; }
+.text-green { color: #10B981; }
+.text-gold { color: #F59E0B; }

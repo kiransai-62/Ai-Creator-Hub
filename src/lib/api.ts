@@ -42,9 +42,12 @@ const isValidUUID = (id: string) => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
-export function getOptimizedImageUrl(url: string, _width = 400, _height = 300) {
+export function getOptimizedImageUrl(url: string, width = 400, height = 300) {
   if (!url) return '';
   // Return raw public URL directly — Supabase image transforms require paid plan
+  if (width && height) {
+    return url;
+  }
   return url;
 }
 
@@ -387,7 +390,7 @@ export const api = {
   },
 
   // F-3: Atomic increment via RPC — proxy through backend for rate limiting
-  async incrementCopyCount(id: string, _userId?: string) {
+  async incrementCopyCount(id: string) {
     if (!isValidUUID(id)) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -711,5 +714,71 @@ export const api = {
       .update({ status })
       .eq('id', reportId);
     if (error) throw error;
+  },
+
+  // ── API Key Management ───────────────────────────────────────────────────────
+  async getApiKeys(): Promise<any[]> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const res = await fetch(`${BACKEND_URL}/api/api-keys`, {
+        method: 'GET',
+        headers
+      });
+      if (!res.ok) throw new Error('Failed to fetch API keys');
+      return await res.json();
+    } catch (err) {
+      console.error('Error in getApiKeys:', err);
+      return [];
+    }
+  },
+
+  async createApiKey(name: string): Promise<any> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json'
+    };
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+    
+    const res = await fetch(`${BACKEND_URL}/api/api-keys`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to create API key');
+    }
+    return await res.json();
+  },
+
+  async deleteApiKey(id: string): Promise<boolean> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const res = await fetch(`${BACKEND_URL}/api/api-keys/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      if (!res.ok) throw new Error('Failed to delete API key');
+      return true;
+    } catch (err) {
+      console.error('Error in deleteApiKey:', err);
+      return false;
+    }
   }
 };

@@ -78,6 +78,28 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
     fetchPrompts();
   }, [query, activeCategory, refreshTrigger]);
 
+  // Recovery flow: copy the prompt when returning authenticated to Explore page
+  useEffect(() => {
+    const pendingCopyId = sessionStorage.getItem('pendingCopy');
+    if (isAuthenticated && pendingCopyId) {
+      async function performPendingCopy() {
+        try {
+          const detail = await api.getPromptDetails(pendingCopyId as string);
+          if (detail) {
+            sessionStorage.removeItem('pendingCopy');
+            await navigator.clipboard.writeText(detail.prompt_text);
+            api.incrementCopyCount(detail.id).catch(console.error);
+            if (onCopy) onCopy();
+            alert(`Prompt "${detail.title}" copied to clipboard!`);
+          }
+        } catch (err) {
+          console.error('Failed to execute pending copy:', err);
+        }
+      }
+      performPendingCopy();
+    }
+  }, [isAuthenticated]);
+
   // Set up Realtime Subscription once on mount
   useEffect(() => {
     const channel = supabase
@@ -285,6 +307,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
                   layoutId={`prompt-card-${prompt.id}`}
                 >
                   <FullPromptCard 
+                    id={prompt.id}
                     image={prompt.image_url || ''}
                     title={prompt.title}
                     author={prompt.author?.username ? `@${prompt.author.username}` : (prompt.author?.full_name || 'Anonymous')}
@@ -297,7 +320,7 @@ export function ExploreScreen({ isAuthenticated, onCopy, onLogin, isAdmin }: Exp
                     onLogin={onLogin}
                     showDelete={isAdmin}
                     showEdit={isAdmin}
-                    showShare={isAdmin}
+                    showShare={true}
                     shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                     onDelete={() => handleDeleteClick(prompt.id)}
                     onEdit={() => navigate(`/edit/${prompt.id}`)}

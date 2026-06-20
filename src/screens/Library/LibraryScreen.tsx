@@ -114,7 +114,7 @@ export function LibraryScreen({ onCardClick, userId, isAdmin }: LibraryScreenPro
                 statPosition={activeTab === 'saved' ? 'top-right' : 'bottom-left'}
                 onClick={() => onCardClick(prompt.slug || prompt.id)}
                 showEdit={isAdmin}
-                showShare={isAdmin}
+                showShare={true}
                 shareUrl={`${window.location.origin}/details/${prompt.slug || prompt.id}`}
                 onEdit={() => navigate(`/edit/${prompt.id}`)}
               />
