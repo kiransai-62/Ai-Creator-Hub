@@ -36,3 +36,13 @@ lint_output.txt
 parse-lint.cjs
 remove_animations.cjs
 
+# Cache and build outputs
+.vite/
+
+# Stale and testing paths
+frontend/
+testsprite_tests/
+backend/testsprite_tests/
+supabase/.temp/
+
+

@@ -77,14 +77,14 @@ function App() {
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
-  // S-1: Check admin status from database with hardcoded fail-safe
-  const ADMIN_EMAIL = 'sunnykiran715@gmail.com';
-  const ADMIN_UIDS = ['770ee842-c7db-4f8c-9acc-7d0bfa26bebb', '44f703ec-2336-497c-8f0f-79ce9b8a59be'];
+  // S-1: Check admin status from database with environment fail-safe
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const adminUids = (import.meta.env.VITE_ADMIN_UIDS || '').split(',').map((s: string) => s.trim());
   
   useEffect(() => {
     if (session?.id) {
       // Immediate failsafe (synchronous, no DB needed)
-      const isHardcodedAdmin = session.email === ADMIN_EMAIL || ADMIN_UIDS.includes(session.id);
+      const isHardcodedAdmin = (adminEmail && session.email === adminEmail) || adminUids.includes(session.id);
       console.log('[Admin Failsafe] email:', session.email, 'id:', session.id, 'match:', isHardcodedAdmin);
       if (isHardcodedAdmin) {
         setIsAdmin(true);
@@ -251,7 +251,12 @@ function App() {
         <meta property="og:title" content="AI Creator Hub – AI Prompt Marketplace" />
         <meta property="og:description" content="Discover, upload, browse, save, and copy high-quality AI prompts for Midjourney, ChatGPT, Stable Diffusion, and more." />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://aicreatorhub.com/" />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&h=630&q=80" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AI Creator Hub – AI Prompt Marketplace" />
+        <meta name="twitter:description" content="Discover, upload, browse, save, and copy high-quality AI prompts for Midjourney, ChatGPT, Stable Diffusion, and more." />
+        <meta name="twitter:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&h=630&q=80" />
       </Helmet>
       <TopBar 
         variant={getTopBarVariant()} 

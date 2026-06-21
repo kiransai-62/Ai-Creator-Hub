@@ -14,6 +14,7 @@ const originalError = console.error;
 
 const checkAdmin = () => {
   if ((window as any).__isAdmin === true) return true;
+  if ((window as any).__isAdmin === false) return false;
   try {
     const key = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
     if (key) {
@@ -22,9 +23,9 @@ const checkAdmin = () => {
       if (user) {
         const email = user.email;
         const id = user.id;
-        const ADMIN_EMAIL = 'sunnykiran715@gmail.com';
-        const ADMIN_UIDS = ['770ee842-c7db-4f8c-9acc-7d0bfa26bebb', '44f703ec-2336-497c-8f0f-79ce9b8a59be'];
-        if (email === ADMIN_EMAIL || ADMIN_UIDS.includes(id)) {
+        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+        const adminUids = (import.meta.env.VITE_ADMIN_UIDS || '').split(',').map((s: string) => s.trim());
+        if ((adminEmail && email === adminEmail) || adminUids.includes(id)) {
           (window as any).__isAdmin = true;
           return true;
         }
@@ -33,6 +34,7 @@ const checkAdmin = () => {
   } catch (e) {
     // Ignore
   }
+  (window as any).__isAdmin = false;
   return false;
 };
 

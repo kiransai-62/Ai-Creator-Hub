@@ -32,4 +32,5 @@ export interface PromptWithAuthor extends Prompt {
   slug?: string | null;
   tags?: string[] | null;
   deleted_at?: string | null;
+  aspect_ratio?: string | null;
 }

@@ -436,6 +436,10 @@ async function start() {
   const robotsTxt = `# AI Creator Hub - Robots.txt
 User-agent: *
 Allow: /
+Allow: /settings/privacy-policy
+Allow: /settings/terms-of-service
+Allow: /settings/copyright-policy
+Allow: /settings/help-center
 Disallow: /admin
 Disallow: /settings
 Disallow: /create

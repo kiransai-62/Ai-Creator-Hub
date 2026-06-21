@@ -13,7 +13,7 @@ interface DashboardScreenProps {
   onNavigate: (screen: string) => void;
 }
 
-export function DashboardScreen({ user, isAdmin = user?.email === 'sunnykiran715@gmail.com', onNavigate }: DashboardScreenProps) {
+export function DashboardScreen({ user, isAdmin = user?.email === import.meta.env.VITE_ADMIN_EMAIL, onNavigate }: DashboardScreenProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'published' | 'saved' | 'copied'>(isAdmin ? 'published' : 'saved');
   const [prompts, setPrompts] = useState<PromptWithAuthor[]>([]);

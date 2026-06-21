@@ -6,8 +6,18 @@ export const isValidUUID = (id: string) => {
 
 export function getOptimizedImageUrl(url: string, width = 400, height = 300) {
   if (!url) return '';
-  if (width && height) {
-    return url;
+  if (url.includes('images.unsplash.com')) {
+    try {
+      const urlObj = new URL(url);
+      urlObj.searchParams.set('w', width.toString());
+      urlObj.searchParams.set('h', height.toString());
+      urlObj.searchParams.set('fit', 'crop');
+      urlObj.searchParams.set('auto', 'format');
+      urlObj.searchParams.set('q', '80');
+      return urlObj.toString();
+    } catch {
+      return url;
+    }
   }
   return url;
 }

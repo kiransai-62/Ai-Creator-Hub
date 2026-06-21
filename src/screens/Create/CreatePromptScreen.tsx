@@ -56,8 +56,8 @@ export function CreatePromptScreen({ user, isAdmin }: CreatePromptScreenProps) {
           }
           setPromptText(prompt.prompt_text);
           setDescription(prompt.description || '');
-          if ((prompt as any).aspect_ratio) {
-            setAspectRatio((prompt as any).aspect_ratio);
+          if (prompt.aspect_ratio) {
+            setAspectRatio(prompt.aspect_ratio);
           }
           setPrice(prompt.price ? `$${prompt.price}` : '');
           setIsPublic(prompt.status === 'published');
